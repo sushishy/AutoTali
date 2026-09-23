@@ -114,7 +114,8 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
 
       {/* Minimalist Shutter Button */}
       {!frozenImage && (
-        <div style={{ position: 'absolute', bottom: 18, zIndex: 10 }}>
+        <div style={{ position: 'absolute', bottom: 18, zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          {/* Direct Camera Shutter */}
           <button
             onClick={captureFrame}
             disabled={isProcessing}
@@ -132,6 +133,42 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
           >
             <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#ffffff' }} />
           </button>
+
+          {/* Native Phone Camera Fallback (Works on HTTP without SSL restrictions!) */}
+          <label
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '4px 10px',
+              background: 'rgba(0,0,0,0.8)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: 'var(--radius-sm)',
+              color: '#a3a3a3',
+              fontSize: '0.7rem',
+              cursor: 'pointer',
+            }}
+          >
+            <Camera size={12} /> Snap Photo (Phone Camera)
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    if (event.target?.result) {
+                      onCapture(event.target.result);
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+          </label>
         </div>
       )}
     </div>
