@@ -28,7 +28,7 @@ class GridDetector:
             blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 31, 8
         )
 
-        table_box = self._find_table_roi(thresh, w, h)
+        table_box, table_found = self._find_table_roi(thresh, w, h)
         tx, ty, tw, th = table_box
         cv2.rectangle(overlay, (tx, ty), (tx + tw, ty + th), (255, 200, 0), 2)
 
@@ -42,6 +42,9 @@ class GridDetector:
         cell_h = grid_h / float(num_rows)
 
         detected_values, all_row_scores = [], []
+        row_contrasts = []
+        valid_row_count = 0
+
         for r in range(num_rows):
             ry1, ry2 = int(grid_start_y + r * cell_h), int(grid_start_y + (r + 1) * cell_h)
             col_scores, col_boxes = [], []
@@ -58,6 +61,17 @@ class GridDetector:
             best_c = int(np.argmax(col_scores))
             val = self.COLUMN_VALUES[best_c]
             detected_values.append(val)
+
+            # Analyze contrast for live validity
+            sorted_scores = sorted(col_scores, reverse=True)
+            top_score = sorted_scores[0]
+            second_score = sorted_scores[1] if len(sorted_scores) > 1 else 0.0
+            contrast = top_score - second_score
+            row_contrasts.append(contrast)
+
+            # Check if this row has an active mark
+            if top_score >= 0.035 and contrast >= 0.012:
+                valid_row_count += 1
 
             # Draw cell boxes and markers
             for c in range(num_cols):
@@ -76,7 +90,20 @@ class GridDetector:
             cv2.putText(overlay, str(v), (cx, max(20, grid_start_y - 8)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2, cv2.LINE_AA)
 
-        return detected_values, overlay, all_row_scores
+        # Calculate overall validity and confidence
+        avg_contrast = sum(row_contrasts) / max(1, len(row_contrasts))
+        # Valid if table was detected and at least 4 of 5 rows have distinct answers, or high contrast
+        is_valid = bool((table_found and valid_row_count >= 4) or (valid_row_count == num_rows))
+        confidence = float(min(1.0, max(0.0, avg_contrast * 12.0 + (0.3 if table_found else 0.0))))
+
+        meta = {
+            "table_found": bool(table_found),
+            "valid_rows": int(valid_row_count),
+            "confidence": round(confidence, 3),
+            "is_valid": is_valid,
+        }
+
+        return detected_values, overlay, all_row_scores, meta
 
     def _find_table_roi(self, thresh, w, h):
         """Locates table boundary via grid morphology, or returns center guide ROI."""
@@ -104,8 +131,8 @@ class GridDetector:
                     best_box = (x, y, tw, th)
 
         if best_box:
-            return best_box
+            return best_box, True
 
         # Fallback centered box (viewfinder framing)
         gw, gh = int(w * 0.78), int(h * 0.68)
-        return (int((w - gw) / 2), int((h - gh) / 2), gw, gh)
+        return (int((w - gw) / 2), int((h - gh) / 2), gw, gh), False

@@ -33,7 +33,7 @@ class StrandDetector:
                 candidates.append((x, y, bw, bh))
 
         # Filter overlapping boxes and group vertically
-        selected_boxes = self._select_vertical_boxes(candidates, h, w)
+        selected_boxes, boxes_found = self._select_vertical_boxes(candidates, h, w)
 
         # Calculate ink density in each box
         scores = []
@@ -44,11 +44,25 @@ class StrandDetector:
 
         best_idx = int(np.argmax(scores)) if scores else 0
         max_score = scores[best_idx] if scores else 0.0
-        detected_choice = (best_idx + 1) if max_score > 0.05 else None
+        detected_choice = (best_idx + 1) if max_score > 0.04 else None
+
+        sorted_scores = sorted(scores, reverse=True)
+        top_score = sorted_scores[0] if sorted_scores else 0.0
+        second_score = sorted_scores[1] if len(sorted_scores) > 1 else 0.0
+        contrast = top_score - second_score
+
+        is_valid = bool(detected_choice is not None and top_score >= 0.045 and contrast >= 0.012)
+        confidence = float(min(1.0, max(0.0, contrast * 12.0 + (0.3 if boxes_found else 0.0))))
+
+        meta = {
+            "boxes_found": bool(boxes_found),
+            "confidence": round(confidence, 3),
+            "is_valid": is_valid,
+        }
 
         # Draw overlays
         for idx, (bx, by, bw, bh) in enumerate(selected_boxes):
-            is_checked = (idx == best_idx and max_score > 0.05)
+            is_checked = (idx == best_idx and max_score > 0.04)
             color = (0, 230, 0) if is_checked else (160, 160, 160)
             cv2.rectangle(overlay, (bx, by), (bx + bw, by + bh), color, 3 if is_checked else 1)
 
@@ -61,7 +75,7 @@ class StrandDetector:
             if is_checked:
                 cv2.circle(overlay, (bx + bw // 2, by + bh // 2), int(bw * 0.25), (0, 230, 0), -1)
 
-        return detected_choice, overlay, scores
+        return detected_choice, overlay, scores, meta
 
     def _select_vertical_boxes(self, candidates, h, w):
         """Finds 3 vertically aligned boxes or falls back to template positions."""
@@ -77,10 +91,10 @@ class StrandDetector:
                 by_x.setdefault(key, []).append(b)
             best_group = sorted(max(by_x.values(), key=len), key=lambda b: b[1])
             if len(best_group) >= 3:
-                return best_group[:3]
+                return best_group[:3], True
 
         # Template fallback if lighting/angle prevents contour detection
         box_s = int(min(h, w) * 0.06)
         start_x, start_y = int(w * 0.15), int(h * 0.35)
         spacing = int(box_s * 2.2)
-        return [(start_x, start_y + i * spacing, box_s, box_s) for i in range(3)]
+        return [(start_x, start_y + i * spacing, box_s, box_s) for i in range(3)], False

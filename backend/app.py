@@ -31,6 +31,7 @@ excel_writer = ExcelWriter()
 class DetectRequest(BaseModel):
     section_id: int
     image_base64: str  # Base64-encoded JPEG from client camera
+    return_overlay: Optional[bool] = True
 
 
 class SaveRequest(BaseModel):
@@ -140,13 +141,15 @@ def detect_marks(payload: DetectRequest):
             raise HTTPException(status_code=404, detail="Section ID not found")
 
         if sec["type"] == "strand":
-            detected_val, overlay, scores = detector.detect_part1_strand(frame)
+            detected_val, overlay, scores, meta = detector.detect_part1_strand(frame)
         else:
-            detected_val, overlay, scores = detector.detect_grid_section(frame)
+            detected_val, overlay, scores, meta = detector.detect_grid_section(frame)
 
-        # Encode annotated overlay frame to base64 JPEG
-        _, buffer = cv2.imencode(".jpg", overlay, [cv2.IMWRITE_JPEG_QUALITY, 85])
-        overlay_b64 = "data:image/jpeg;base64," + base64.b64encode(buffer).decode("utf-8")
+        overlay_b64 = None
+        if payload.return_overlay:
+            # Encode annotated overlay frame to base64 JPEG
+            _, buffer = cv2.imencode(".jpg", overlay, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            overlay_b64 = "data:image/jpeg;base64," + base64.b64encode(buffer).decode("utf-8")
 
         return {
             "success": True,
@@ -154,6 +157,9 @@ def detect_marks(payload: DetectRequest):
             "detected_value": detected_val,
             "overlay_base64": overlay_b64,
             "scores": scores,
+            "is_valid": meta.get("is_valid", False),
+            "confidence": meta.get("confidence", 0.0),
+            "table_found": meta.get("table_found", meta.get("boxes_found", False)),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

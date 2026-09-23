@@ -1,143 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useSurvey } from './hooks/useSurvey';
 import StepHeader from './components/StepHeader';
+import SectionStrip from './components/SectionStrip';
 import CameraScanner from './components/CameraScanner';
 import DetectionReview from './components/DetectionReview';
 import ManualEntry from './components/ManualEntry';
+import SummaryView from './components/SummaryView';
 
 export default function App() {
-  const [sections, setSections] = useState([]);
-  const [currentStepIdx, setCurrentStepIdx] = useState(() => {
-    const saved = localStorage.getItem('autotali_step');
-    return saved !== null ? parseInt(saved, 10) : 0;
-  });
-  const [respondentNo, setRespondentNo] = useState(() => {
-    const saved = localStorage.getItem('autotali_resp');
-    return saved !== null ? parseInt(saved, 10) : 16;
-  });
-  const [localIp, setLocalIp] = useState('');
-  const [collectedData, setCollectedData] = useState(() => {
-    try {
-      const saved = localStorage.getItem('autotali_data');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
+  const {
+    sections,
+    currentStepIdx,
+    setCurrentStepIdx,
+    currentSection,
+    respondentNo,
+    setRespondentNo,
+    collectedData,
+    setCollectedData,
+    activeTab,
+    setActiveTab,
+    activeFile,
+    availableFiles,
+    localIp,
+    switchFile,
+    createNewFile,
+    saveToExcel,
+    advanceStep,
+    resetSurvey,
+  } = useSurvey();
+
   const [frozenOverlay, setFrozenOverlay] = useState(null);
   const [detectedVal, setDetectedVal] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [notice, setNotice] = useState(null);
-  const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem('autotali_tab') || 'scanner';
-  });
   const [isCardOpen, setIsCardOpen] = useState(false);
-  const [activeFile, setActiveFile] = useState('Tally.xlsx');
-  const [availableFiles, setAvailableFiles] = useState(['Tally.xlsx']);
 
-  // Sync to localStorage
-  useEffect(() => {
-    localStorage.setItem('autotali_step', currentStepIdx);
-  }, [currentStepIdx]);
-
-  useEffect(() => {
-    localStorage.setItem('autotali_resp', respondentNo);
-  }, [respondentNo]);
-
-  useEffect(() => {
-    localStorage.setItem('autotali_data', JSON.stringify(collectedData));
-  }, [collectedData]);
-
-  useEffect(() => {
-    localStorage.setItem('autotali_tab', activeTab);
-  }, [activeTab]);
-
-  useEffect(() => {
-    fetchStatus();
-  }, []);
-
-  const fetchStatus = async () => {
-    try {
-      const res = await fetch('/api/status');
-      const data = await res.json();
-      const secs = data.sections || [];
-      setSections(secs);
-      if (data.active_file) setActiveFile(data.active_file);
-      if (data.available_files) setAvailableFiles(data.available_files);
-
-      // If no saved respondent in localStorage, use backend next
-      if (!localStorage.getItem('autotali_resp')) {
-        setRespondentNo(data.next_respondent_no || 16);
-      }
-      setLocalIp(data.local_ip || '');
-
-      // Restore active value for the restored step if available
-      const savedStep = parseInt(localStorage.getItem('autotali_step') || '0', 10);
-      const activeSec = secs[savedStep];
-      if (activeSec && collectedData[activeSec.id] !== undefined) {
-        setDetectedVal(collectedData[activeSec.id]);
-      }
-    } catch (err) {
-      console.warn('API connection check:', err);
-    }
+  const handleRetake = () => {
+    setFrozenOverlay(null);
+    setDetectedVal(null);
+    setIsCardOpen(false);
+    setNotice(null);
   };
 
-  const handleSwitchFile = async (filename) => {
-    try {
-      const res = await fetch('/api/sheets/switch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setActiveFile(data.active_file);
-        setAvailableFiles(data.available_files);
-        setRespondentNo(data.next_respondent_no);
-        setCurrentStepIdx(0);
-        setCollectedData({});
-        handleRetake();
-      } else {
-        alert(`Failed to switch file: ${data.detail || 'Error'}`);
-      }
-    } catch (e) {
-      alert('Network error switching file');
-    }
+  const goToStep = (idx) => {
+    setCurrentStepIdx(idx);
+    const targetSection = sections[idx];
+    setDetectedVal(targetSection && collectedData[targetSection.id] !== undefined ? collectedData[targetSection.id] : null);
+    handleRetake();
   };
-
-  const handleCreateNewFile = async (rawName) => {
-    let filename = rawName.trim();
-    if (!filename) return;
-    if (!filename.endsWith('.xlsx')) filename += '.xlsx';
-
-    try {
-      const res = await fetch('/api/sheets/new', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setActiveFile(data.active_file);
-        setAvailableFiles(data.available_files);
-        setRespondentNo(data.next_respondent_no || 1);
-        setCurrentStepIdx(0);
-        setCollectedData({});
-        handleRetake();
-        alert(`Created and switched to empty questionnaire: ${filename}`);
-      } else {
-        alert(`Could not create file: ${data.detail || 'Error'}`);
-      }
-    } catch (e) {
-      alert('Network error creating file');
-    }
-  };
-
-  const handleSetRespondentNo = (newNo) => {
-    setRespondentNo(newNo);
-  };
-
-  const currentSection = sections[currentStepIdx] || { id: 1, name: 'Part I — SHS Strand', type: 'strand' };
-
 
   const handleCapture = async (base64Image) => {
     setIsProcessing(true);
@@ -146,10 +56,7 @@ export default function App() {
       const res = await fetch('/api/detect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          section_id: currentSection.id,
-          image_base64: base64Image,
-        }),
+        body: JSON.stringify({ section_id: currentSection.id, image_base64: base64Image, return_overlay: true }),
       });
       const data = await res.json();
       if (data.success) {
@@ -160,71 +67,43 @@ export default function App() {
       } else {
         setNotice('Detection failed. Please retry.');
       }
-    } catch (err) {
+    } catch {
       setNotice('Network error connecting to backend.');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const goToStep = (idx) => {
-    setCurrentStepIdx(idx);
-    const targetSection = sections[idx];
-    const existing = targetSection ? collectedData[targetSection.id] : null;
-    setDetectedVal(existing !== undefined ? existing : null);
-    setFrozenOverlay(null);
-    setIsCardOpen(false);
-    setNotice(null);
-  };
-
-  const handlePreviousStep = () => {
-    if (currentStepIdx > 0) {
-      goToStep(currentStepIdx - 1);
-    }
-  };
-
-  const handleRetake = () => {
-    setFrozenOverlay(null);
-    setDetectedVal(null);
-    setIsCardOpen(false);
+  const handleAutoLock = ({ overlayBase64, detectedValue }) => {
+    setFrozenOverlay(overlayBase64);
+    setDetectedVal(detectedValue);
+    setIsCardOpen(true);
     setNotice(null);
   };
 
   const handleConfirmNext = async () => {
-    const updatedCollected = { ...collectedData, [currentSection.id]: detectedVal };
-    setCollectedData(updatedCollected);
+    const updated = { ...collectedData, [currentSection.id]: detectedVal };
+    setCollectedData(updated);
 
-    if (currentStepIdx < sections.length - 1) {
-      const nextIdx = currentStepIdx + 1;
-      setCurrentStepIdx(nextIdx);
+    const nextIdx = advanceStep();
+    if (nextIdx !== -1) {
       const nextSec = sections[nextIdx];
-      const existingNext = nextSec ? updatedCollected[nextSec.id] : null;
-      setDetectedVal(existingNext !== undefined ? existingNext : null);
+      setDetectedVal(nextSec && updated[nextSec.id] !== undefined ? updated[nextSec.id] : null);
       setFrozenOverlay(null);
       setNotice(null);
     } else {
       setIsProcessing(true);
       setNotice('Saving row to Tally.xlsx...');
       try {
-        const res = await fetch('/api/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            respondent_no: respondentNo,
-            data: updatedCollected,
-          }),
-        });
-        const data = await res.json();
+        const data = await saveToExcel(updated);
         if (data.success) {
           alert(`Saved respondent #${respondentNo} to Excel!\nReady for next respondent.`);
-          setCurrentStepIdx(0);
-          setCollectedData({});
-          setRespondentNo(data.next_respondent_no);
+          resetSurvey(data.next_respondent_no);
           handleRetake();
         } else {
           alert(`Failed saving to Excel: ${data.detail || 'Unknown error'}`);
         }
-      } catch (err) {
+      } catch {
         alert('Failed to connect to backend save endpoint.');
       } finally {
         setIsProcessing(false);
@@ -241,15 +120,15 @@ export default function App() {
         totalSteps={sections.length || 7}
         sectionName={currentSection.name}
         sections={sections}
-        onSelectStep={(idx) => goToStep(idx)}
+        onSelectStep={goToStep}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         localIp={localIp}
-        onSetRespondentNo={handleSetRespondentNo}
+        onSetRespondentNo={setRespondentNo}
         activeFile={activeFile}
         availableFiles={availableFiles}
-        onSwitchFile={handleSwitchFile}
-        onCreateNewFile={handleCreateNewFile}
+        onSwitchFile={async (f) => (await switchFile(f)) && handleRetake()}
+        onCreateNewFile={async (f) => (await createNewFile(f)) && handleRetake()}
       />
 
       {notice && (
@@ -258,52 +137,14 @@ export default function App() {
         </div>
       )}
 
-      {/* Section Name Strip — shows above camera/content area */}
       {activeTab !== 'guide' && (
-        <div style={{
-          padding: '6px 16px',
-          borderBottom: '1px solid var(--border-primary)',
-          background: 'var(--bg-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 8,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            <span style={{
-              fontSize: '0.68rem',
-              fontWeight: 700,
-              color: 'var(--text-muted)',
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              whiteSpace: 'nowrap',
-            }}>
-              Step {currentStepIdx + 1} / {sections.length || 7}
-            </span>
-            <span style={{ width: 1, height: 12, background: 'var(--border-primary)', flexShrink: 0 }} />
-            <span style={{
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: '#ffffff',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}>
-              {currentSection.name}
-            </span>
-          </div>
-          {/* Back / forward quick nav */}
-          <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-            {currentStepIdx > 0 && (
-              <button
-                onClick={() => goToStep(currentStepIdx - 1)}
-                style={{ padding: '2px 8px', fontSize: '0.7rem', background: 'transparent', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
-              >
-                ← Back
-              </button>
-            )}
-          </div>
-        </div>
+        <SectionStrip
+          currentStep={currentStepIdx + 1}
+          totalSteps={sections.length || 7}
+          sectionName={currentSection.name}
+          canGoBack={currentStepIdx > 0}
+          onPrevious={() => goToStep(currentStepIdx - 1)}
+        />
       )}
 
       {activeTab === 'manual' ? (
@@ -313,7 +154,7 @@ export default function App() {
             currentVal={detectedVal}
             onChange={setDetectedVal}
             onConfirm={handleConfirmNext}
-            onPrevious={handlePreviousStep}
+            onPrevious={() => goToStep(currentStepIdx - 1)}
             canGoBack={currentStepIdx > 0}
             isLastStep={currentStepIdx === sections.length - 1}
             isProcessing={isProcessing}
@@ -325,7 +166,10 @@ export default function App() {
         <main className="scanner-grid">
           <div className="camera-container-box">
             <CameraScanner
+              sectionId={currentSection.id}
+              sectionName={currentSection.name}
               onCapture={handleCapture}
+              onAutoLock={handleAutoLock}
               frozenImage={frozenOverlay}
               isProcessing={isProcessing}
               onViewAnswers={() => setIsCardOpen(true)}
@@ -340,7 +184,7 @@ export default function App() {
               onChange={setDetectedVal}
               onRetake={handleRetake}
               onConfirm={handleConfirmNext}
-              onPrevious={handlePreviousStep}
+              onPrevious={() => goToStep(currentStepIdx - 1)}
               onDismiss={() => setIsCardOpen(false)}
               canGoBack={currentStepIdx > 0}
               isLastStep={currentStepIdx === sections.length - 1}
@@ -349,47 +193,16 @@ export default function App() {
           </div>
         </main>
       ) : (
-        <main style={{ flex: 1, padding: 20, overflowY: 'auto' }}>
-          <div style={{ maxWidth: 760, margin: '0 auto', background: 'var(--bg-secondary)', padding: 20, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-primary)' }}>
-            <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 16 }}>
-              Respondent #{respondentNo} — Summary
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {sections.map((sec, idx) => {
-                const answer = collectedData[sec.id];
-                const isCurrent = idx === currentStepIdx;
-                return (
-                  <div
-                    key={sec.id}
-                    onClick={() => {
-                      setCurrentStepIdx(idx);
-                      handleRetake();
-                    }}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '10px 14px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: isCurrent ? 'var(--bg-elevated)' : 'transparent',
-                      border: `1px solid ${isCurrent ? '#ffffff' : 'var(--border-primary)'}`,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div>
-                      <span style={{ fontWeight: 600, color: '#fff', fontSize: '0.85rem' }}>
-                        {idx + 1}. {sec.name}
-                      </span>
-                    </div>
-                    <span style={{ fontWeight: 600, color: answer ? '#ffffff' : 'var(--text-muted)', fontSize: '0.85rem' }}>
-                      {answer ? (Array.isArray(answer) ? `[ ${answer.join(', ')} ]` : `Choice ${answer}`) : 'Pending'}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </main>
+        <SummaryView
+          respondentNo={respondentNo}
+          sections={sections}
+          collectedData={collectedData}
+          currentStepIdx={currentStepIdx}
+          onSelectStep={(idx) => {
+            goToStep(idx);
+            setActiveTab('scanner');
+          }}
+        />
       )}
     </div>
   );

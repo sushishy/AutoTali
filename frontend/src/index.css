@@ -178,3 +178,82 @@ button:disabled {
     font-size: 0.8rem !important;
   }
 }
+
+/* ==========================================================================
+   QR-STYLE AUTO-SCANNER ANIMATIONS
+   ========================================================================== */
+
+@keyframes scanLaser {
+  0% {
+    top: 5%;
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  100% {
+    top: 95%;
+    opacity: 0.2;
+  }
+}
+
+.scanner-laser-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #22c55e 20%, #4ade80 50%, #22c55e 80%, transparent 100%);
+  box-shadow: 0 0 12px #22c55e, 0 0 4px #4ade80;
+  animation: scanLaser 2s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes lockFlashAnim {
+  0% {
+    box-shadow: inset 0 0 0 4px #22c55e, 0 0 30px rgba(34, 197, 94, 0.8);
+    border-color: #22c55e;
+  }
+  100% {
+    box-shadow: inset 0 0 0 0px transparent, 0 0 0px transparent;
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.viewfinder-locked {
+  animation: lockFlashAnim 0.5s ease-out forwards;
+}
+
+.scanner-status-pill {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  background: rgba(10, 10, 10, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 6px #22c55e;
+  animation: dotPulse 1s ease infinite alternate;
+}
+
+@keyframes dotPulse {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.3); opacity: 1; }
+}
+

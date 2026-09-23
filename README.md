@@ -6,11 +6,11 @@
 
 ## Features
 
-- 📷 **Camera Scanner** — Point your phone camera at a questionnaire section and AutoTali automatically detects checked boxes using OpenCV. Results pop up as a review card you can swipe away or confirm.
+- 📷 **Live QR-Style Auto-Scanner** — Aim your camera at any questionnaire section and AutoTali automatically detects the answers and snaps them instantly like a QR code scanner (complete with audio chime and haptic feedback). An **AUTO/MANUAL** toggle lets you switch between instant auto-scan and manual shutter mode.
 - ✍️ **Manual Mode** — Tap answers directly on screen. Works on any device including iPhone.
 - 📊 **Summary Mode** — See all collected answers for the current respondent at a glance before saving.
 - 💾 **Smart Save (Upsert)** — Saves to Excel without creating duplicate rows. If a respondent number already exists, it updates that row in-place.
-- ✏️ **Edit Existing Respondents** — Tap the respondent `#` in the header and change the number. If that respondent already has data in Excel, their answers are automatically loaded back into the app for editing (shown with an **EDIT** badge).
+- ✏️ **Edit Existing Respondents** — Tap the respondent `#` in the header and jump directly to any respondent number.
 - 📱 **Mobile-First UI** — Full-screen camera on phones, swipe-down gesture to dismiss the result card, responsive header with compact dropdowns.
 - 🗂️ **Multi-File Support** — Switch between multiple Excel files or create a new empty questionnaire file from the dropdown — no need to touch the filesystem manually.
 - 🔢 **Step Protection** — You can't skip ahead to a section you haven't reached yet. Steps are remembered across page reloads.
