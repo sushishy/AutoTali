@@ -30,13 +30,23 @@ class HeaderBar(tk.Frame):
 
         tk.Button(
             right_f, text="Connect", command=self._trigger_reconnect,
-            bg="#2563eb", fg="white", relief=tk.FLAT, padx=10, cursor="hand2"
-        ).pack(side=tk.LEFT, padx=3)
+            bg="#2563eb", fg="white", relief=tk.FLAT, padx=8, cursor="hand2"
+        ).pack(side=tk.LEFT, padx=2)
+
+        tk.Button(
+            right_f, text="💻 Laptop Cam", command=self._set_laptop_cam,
+            bg="#0284c7", fg="white", relief=tk.FLAT, padx=8, cursor="hand2"
+        ).pack(side=tk.LEFT, padx=2)
 
         tk.Button(
             right_f, text="⚡ USB Phone", command=self._set_usb_phone,
             bg="#059669", fg="white", relief=tk.FLAT, padx=8, cursor="hand2"
-        ).pack(side=tk.LEFT, padx=3)
+        ).pack(side=tk.LEFT, padx=2)
+
+    def _set_laptop_cam(self):
+        self.cam_entry.delete(0, tk.END)
+        self.cam_entry.insert(0, "0")
+        self._trigger_reconnect()
 
     def _set_usb_phone(self):
         self.cam_entry.delete(0, tk.END)

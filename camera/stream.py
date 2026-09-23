@@ -37,7 +37,12 @@ class CameraStream:
                     pass
 
         try:
-            self.cap = cv2.VideoCapture(source)
+            if isinstance(source, int):
+                # On Windows, DirectShow backend opens hardware webcams instantly with high FPS
+                self.cap = cv2.VideoCapture(source, cv2.CAP_DSHOW)
+            else:
+                self.cap = cv2.VideoCapture(source)
+
             if not self.cap.isOpened():
                 self.last_error = f"Cannot open video source: {self.src}"
                 return False

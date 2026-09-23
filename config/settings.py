@@ -5,8 +5,8 @@ Defines camera streaming URL, Excel destination path, and the 7 survey sections.
 
 import os
 
-# Camera Configuration (USB ADB tunnel: http://127.0.0.1:8080/video or WiFi IP)
-DEFAULT_CAMERA_URL = "http://127.0.0.1:8080/video"
+# Camera Configuration ('0' = built-in laptop camera, or IP URL)
+DEFAULT_CAMERA_URL = "0"
 
 # Excel Directory & File Configuration
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
