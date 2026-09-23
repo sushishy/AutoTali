@@ -32,6 +32,7 @@ class AutoTallyApp(tk.Tk):
         self.collected_data = {}
         self.state = "live"
         self.current_detected_val = None
+        self.zoom_level = 1.0
 
         self._build_layout()
         self._refresh_respondent_info()
@@ -51,8 +52,8 @@ class AutoTallyApp(tk.Tk):
         container = tk.Frame(self, bg=BG_DARK, padx=16, pady=6)
         container.pack(fill=tk.BOTH, expand=True)
 
-        sec_bar = tk.Frame(container, bg=BG_CARD, padx=12, pady=8)
-        sec_bar.pack(fill=tk.X, pady=(0, 8))
+        sec_bar = tk.Frame(container, bg=BG_CARD, padx=12, pady=6)
+        sec_bar.pack(fill=tk.X, pady=(0, 6))
 
         self.sec_badge = tk.Label(sec_bar, text="SCAN STEP 1/7", bg="#3b82f6", fg="white", font=("Segoe UI", 9, "bold"), padx=8, pady=2)
         self.sec_badge.pack(side=tk.LEFT, padx=(0, 10))
@@ -60,17 +61,67 @@ class AutoTallyApp(tk.Tk):
         self.sec_name_lbl = ttk.Label(sec_bar, text="Now scan: Part I — SHS Strand", style="SectionTitle.TLabel")
         self.sec_name_lbl.pack(side=tk.LEFT)
 
+        # Zoom Controls
+        zoom_frame = tk.Frame(sec_bar, bg=BG_CARD)
+        zoom_frame.pack(side=tk.RIGHT)
+
+        tk.Label(zoom_frame, text="🔍 Zoom:", bg=BG_CARD, fg="#cbd5e1", font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=3)
+        tk.Button(zoom_frame, text="➖", command=self._zoom_out, bg="#3f3f46", fg="white", relief=tk.FLAT, padx=6, font=("Segoe UI", 8), cursor="hand2").pack(side=tk.LEFT, padx=1)
+        self.zoom_lbl = tk.Label(zoom_frame, text="1.0x", bg=BG_CARD, fg="#38bdf8", width=5, font=("Segoe UI", 9, "bold"))
+        self.zoom_lbl.pack(side=tk.LEFT)
+        tk.Button(zoom_frame, text="➕", command=self._zoom_in, bg="#3f3f46", fg="white", relief=tk.FLAT, padx=6, font=("Segoe UI", 8), cursor="hand2").pack(side=tk.LEFT, padx=1)
+        tk.Button(zoom_frame, text="Reset", command=self._zoom_reset, bg="#27272a", fg="#a1a1aa", relief=tk.FLAT, padx=6, font=("Segoe UI", 8), cursor="hand2").pack(side=tk.LEFT, padx=3)
+
         body = tk.Frame(container, bg=BG_DARK)
         body.pack(fill=tk.BOTH, expand=True)
 
-        self.cam_display = tk.Label(body, bg="#09090b", text="Connecting to camera...", fg="#a1a1aa", font=("Segoe UI", 12))
-        self.cam_display.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        # Frame with pack_propagate(False) prevents image from pushing buttons out of the window!
+        self.cam_frame = tk.Frame(body, bg="#09090b", width=680, height=500)
+        self.cam_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        self.cam_frame.pack_propagate(False)
+
+        self.cam_display = tk.Label(self.cam_frame, bg="#09090b", text="Connecting to camera...", fg="#a1a1aa", font=("Segoe UI", 12))
+        self.cam_display.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+        # Mouse wheel & middle click zoom bindings
+        for widget in (self.cam_display, self.cam_frame):
+            widget.bind("<MouseWheel>", self._on_mousewheel_zoom)
+            widget.bind("<Button-2>", lambda e: self._zoom_reset())
 
         self.side_panel = SidePanel(body)
         self.side_panel.pack(side=tk.RIGHT, fill=tk.Y)
         self.side_panel.render_fields(config.SECTIONS[0]["type"])
 
         self._build_bottom_controls()
+
+    def _zoom_in(self):
+        self.zoom_level = min(3.5, round(self.zoom_level + 0.15, 2))
+        self.zoom_lbl.config(text=f"{self.zoom_level:.1f}x")
+
+    def _zoom_out(self):
+        self.zoom_level = max(1.0, round(self.zoom_level - 0.15, 2))
+        self.zoom_lbl.config(text=f"{self.zoom_level:.1f}x")
+
+    def _zoom_reset(self):
+        self.zoom_level = 1.0
+        self.zoom_lbl.config(text="1.0x")
+
+    def _on_mousewheel_zoom(self, event):
+        if event.delta > 0:
+            self._zoom_in()
+        else:
+            self._zoom_out()
+
+    def _apply_zoom_crop(self, frame):
+        """Digital zoom by cropping the center ROI."""
+        if self.zoom_level <= 1.0:
+            return frame
+        h, w = frame.shape[:2]
+        crop_w = int(w / self.zoom_level)
+        crop_h = int(h / self.zoom_level)
+        x1 = (w - crop_w) // 2
+        y1 = (h - crop_h) // 2
+        return frame[y1:y1 + crop_h, x1:x1 + crop_w]
 
     def _build_bottom_controls(self):
         bottom = tk.Frame(self, bg=BG_DARKER, padx=16, pady=12)
@@ -92,23 +143,33 @@ class AutoTallyApp(tk.Tk):
         if self.state == "live":
             grabbed, frame = self.camera.read()
             if grabbed and frame is not None:
+                # Apply digital zoom crop
+                active_frame = self._apply_zoom_crop(frame)
+
                 sec = config.SECTIONS[self.current_section_idx]
                 det_fn = self.detector.detect_part1_strand if sec["type"] == "strand" else self.detector.detect_grid_section
-                detected_val, display_frame, _ = det_fn(frame)
+                detected_val, display_frame, _ = det_fn(active_frame)
 
                 self.current_detected_val = detected_val
                 self.side_panel.sync_detection(sec["type"], detected_val)
                 self._display_image(display_frame)
             else:
-                self.cam_display.config(text=f"Waiting for video feed...\nSource: {self.camera.src}\n(Check IP Webcam app)")
+                self.cam_display.config(text=f"Waiting for video feed...\nSource: {self.camera.src}\n(Check camera connection)")
         self.after(33, self._poll_camera)
 
     def _display_image(self, cv_frame):
         rgb_frame = cv2.cvtColor(cv_frame, cv2.COLOR_BGR2RGB)
         h, w = rgb_frame.shape[:2]
-        disp_w, disp_h = max(self.cam_display.winfo_width(), 480), max(self.cam_display.winfo_height(), 360)
-        scale = min(disp_w / w, disp_h / h)
-        resized = cv2.resize(rgb_frame, (max(1, int(w * scale)), max(1, int(h * scale))), interpolation=cv2.INTER_AREA)
+
+        # Use parent cam_frame dimensions to strictly prevent runaway label growth
+        disp_w = max(self.cam_frame.winfo_width(), 480)
+        disp_h = max(self.cam_frame.winfo_height(), 360)
+
+        scale = min(disp_w / float(w), disp_h / float(h))
+        new_w = max(1, int(w * scale))
+        new_h = max(1, int(h * scale))
+
+        resized = cv2.resize(rgb_frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
         imgtk = ImageTk.PhotoImage(image=Image.fromarray(resized))
         self.cam_display.imgtk = imgtk
         self.cam_display.configure(image=imgtk, text="")
@@ -119,9 +180,10 @@ class AutoTallyApp(tk.Tk):
             messagebox.showwarning("No Camera", "Camera feed is not ready.")
             return
 
+        active_frame = self._apply_zoom_crop(frame)
         sec = config.SECTIONS[self.current_section_idx]
         det_fn = self.detector.detect_part1_strand if sec["type"] == "strand" else self.detector.detect_grid_section
-        self.current_detected_val, overlay, _ = det_fn(frame)
+        self.current_detected_val, overlay, _ = det_fn(active_frame)
 
         self.state = "captured"
         self.side_panel.sync_detection(sec["type"], self.current_detected_val)

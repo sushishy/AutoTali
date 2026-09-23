@@ -28,6 +28,9 @@ class CameraStream:
             source_str = source.strip()
             if source_str.isdigit():
                 source = int(source_str)
+            elif source_str.lower().startswith("scrcpy"):
+                # Direct hardware camera via scrcpy & ffmpeg pipe (No Android app needed!)
+                return self._start_scrcpy_stream(source_str)
             elif "localhost" in source_str or "127.0.0.1" in source_str:
                 # Ensure ADB forwards USB traffic to phone IP Webcam server
                 import subprocess
@@ -64,6 +67,83 @@ class CameraStream:
                 self.cap.release()
             return False
 
+    def _start_scrcpy_stream(self, src_str):
+        """Streams directly from phone back camera via scrcpy and rawvideo pipe."""
+        import subprocess
+        import numpy as np
+
+        cam_id = "0"
+        if ":" in src_str:
+            parts = src_str.split(":")
+            if len(parts) > 1 and parts[1].strip():
+                cam_id = parts[1].strip()
+
+        # Resolution for phone camera stream
+        w, h = 1280, 720
+        self.scrcpy_w, self.scrcpy_h = w, h
+
+        # Pipeline: scrcpy raw camera -> stdout -> ffmpeg rawvideo -> python pipe
+        scrcpy_cmd = [
+            "scrcpy",
+            "--video-source=camera",
+            f"--camera-id={cam_id}",
+            f"--camera-size={w}x{h}",
+            "--camera-fps=30",
+            "--no-audio",
+            "--no-window",
+            "--no-control",
+            "--video-codec=h264",
+            "--raw-stream=-"
+        ]
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-loglevel", "error",
+            "-f", "h264",
+            "-i", "pipe:0",
+            "-f", "rawvideo",
+            "-pix_fmt", "bgr24",
+            "pipe:1"
+        ]
+
+        try:
+            self.scrcpy_proc = subprocess.Popen(
+                scrcpy_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+            )
+            self.ffmpeg_proc = subprocess.Popen(
+                ffmpeg_cmd,
+                stdin=self.scrcpy_proc.stdout,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                bufsize=w * h * 3
+            )
+            self.scrcpy_proc.stdout.close()  # Allow ffmpeg to receive SIGPIPE
+
+            self.running = True
+            self.thread = threading.Thread(target=self._update_scrcpy, daemon=True)
+            self.thread.start()
+            self.last_error = None
+            return True
+        except Exception as e:
+            self.last_error = f"scrcpy camera error: {e}"
+            self.running = False
+            return False
+
+    def _update_scrcpy(self):
+        """Continuously reads uncompressed BGR frames from ffmpeg stdout."""
+        import numpy as np
+        frame_size = self.scrcpy_w * self.scrcpy_h * 3
+
+        while self.running and self.ffmpeg_proc and self.ffmpeg_proc.poll() is None:
+            raw_bytes = self.ffmpeg_proc.stdout.read(frame_size)
+            if len(raw_bytes) == frame_size:
+                frame = np.frombuffer(raw_bytes, dtype=np.uint8).reshape((self.scrcpy_h, self.scrcpy_w, 3))
+                with self.lock:
+                    self.grabbed = True
+                    self.frame = frame
+            else:
+                time.sleep(0.01)
+
     def _update(self):
         """Continuously pulls latest frames to avoid buffer lag."""
         while self.running and self.cap and self.cap.isOpened():
@@ -99,6 +179,18 @@ class CameraStream:
             except Exception:
                 pass
             self.cap = None
+
+        # Terminate scrcpy & ffmpeg if running
+        for proc_name in ("ffmpeg_proc", "scrcpy_proc"):
+            proc = getattr(self, proc_name, None)
+            if proc:
+                try:
+                    proc.kill()
+                    proc.wait(timeout=0.5)
+                except Exception:
+                    pass
+                setattr(self, proc_name, None)
+
         self.frame = None
         self.grabbed = False
 

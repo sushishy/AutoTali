@@ -30,7 +30,12 @@ class HeaderBar(tk.Frame):
 
         tk.Button(
             right_f, text="Connect", command=self._trigger_reconnect,
-            bg="#2563eb", fg="white", relief=tk.FLAT, padx=8, cursor="hand2"
+            bg="#2563eb", fg="white", relief=tk.FLAT, padx=7, cursor="hand2"
+        ).pack(side=tk.LEFT, padx=2)
+
+        tk.Button(
+            right_f, text="📱 Phone Cam (scrcpy)", command=self._set_scrcpy_cam,
+            bg="#8b5cf6", fg="white", relief=tk.FLAT, padx=8, cursor="hand2"
         ).pack(side=tk.LEFT, padx=2)
 
         tk.Button(
@@ -38,19 +43,14 @@ class HeaderBar(tk.Frame):
             bg="#0284c7", fg="white", relief=tk.FLAT, padx=8, cursor="hand2"
         ).pack(side=tk.LEFT, padx=2)
 
-        tk.Button(
-            right_f, text="⚡ USB Phone", command=self._set_usb_phone,
-            bg="#059669", fg="white", relief=tk.FLAT, padx=8, cursor="hand2"
-        ).pack(side=tk.LEFT, padx=2)
+    def _set_scrcpy_cam(self):
+        self.cam_entry.delete(0, tk.END)
+        self.cam_entry.insert(0, "scrcpy")
+        self._trigger_reconnect()
 
     def _set_laptop_cam(self):
         self.cam_entry.delete(0, tk.END)
         self.cam_entry.insert(0, "0")
-        self._trigger_reconnect()
-
-    def _set_usb_phone(self):
-        self.cam_entry.delete(0, tk.END)
-        self.cam_entry.insert(0, "http://127.0.0.1:8080/video")
         self._trigger_reconnect()
 
     def _trigger_reconnect(self):
