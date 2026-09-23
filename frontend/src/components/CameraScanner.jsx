@@ -108,19 +108,60 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
     onCapture(canvas.toDataURL('image/jpeg', 0.9));
   };
 
+  useEffect(() => {
+    // When unfreezing (retake, next step, etc.), re-ensure video is playing stream
+    if (!frozenImage) {
+      const activeTracks = streamRef.current
+        ? streamRef.current.getVideoTracks().filter((t) => t.readyState === 'live')
+        : [];
+
+      if (activeTracks.length === 0) {
+        // Stream ended or interrupted (e.g. mobile browser suspended track), restart camera
+        startCamera();
+      } else if (videoRef.current) {
+        if (videoRef.current.srcObject !== streamRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+        }
+        videoRef.current.play().catch(() => {});
+      }
+    }
+  }, [frozenImage]);
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', background: '#0a0a0a', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {frozenImage ? (
-        <img src={frozenImage} alt="Capture" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-      ) : (
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          style={{ width: '100%', height: '100%', objectFit: 'contain', transform: `scale(${zoomLevel})`, transition: 'transform 0.1s ease-out' }}
+      {/* Captured Frozen Image Overlay */}
+      {frozenImage && (
+        <img
+          src={frozenImage}
+          alt="Capture Overlay"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            zIndex: 2,
+            background: '#0a0a0a',
+          }}
         />
       )}
+
+      {/* Persistent Live Video Feed */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          transform: `scale(${zoomLevel})`,
+          transition: 'transform 0.1s ease-out',
+          display: frozenImage ? 'none' : 'block',
+        }}
+      />
 
       {/* Viewfinder Target */}
       {!frozenImage && (
