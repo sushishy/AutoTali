@@ -141,9 +141,6 @@ export default function ManualEntry({
                   <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff' }}>
                     Question {qIdx + 1}
                   </span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: 8 }}>
-                    {section.cols ? section.cols[qIdx] : ''}
-                  </span>
                 </div>
 
                 <div style={{ display: 'flex', gap: 6 }}>

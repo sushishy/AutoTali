@@ -33,7 +33,7 @@ SECTIONS = [
     },
     {
         "id": 2,
-        "name": "A. Device Availability",
+        "name": "Device Availability",
         "type": "grid",
         "cols": ["C", "D", "E", "F", "G"],
         "num_questions": 5,
@@ -41,7 +41,7 @@ SECTIONS = [
     },
     {
         "id": 3,
-        "name": "B. Internet Connectivity",
+        "name": "Internet Connectivity",
         "type": "grid",
         "cols": ["H", "I", "J", "K", "L"],
         "num_questions": 5,
@@ -49,7 +49,7 @@ SECTIONS = [
     },
     {
         "id": 4,
-        "name": "C. Frequency of ICT Use",
+        "name": "Frequency of ICT Use",
         "type": "grid",
         "cols": ["M", "N", "O", "P", "Q"],
         "num_questions": 5,
@@ -57,7 +57,7 @@ SECTIONS = [
     },
     {
         "id": 5,
-        "name": "A. Perceived Academic Difficulty",
+        "name": "Perceived Academic Difficulty",
         "type": "grid",
         "cols": ["R", "S", "T", "U", "V"],
         "num_questions": 5,
@@ -65,7 +65,7 @@ SECTIONS = [
     },
     {
         "id": 6,
-        "name": "B. Computing Self-Efficacy",
+        "name": "Computing Self-Efficacy",
         "type": "grid",
         "cols": ["W", "X", "Y", "Z", "AA"],
         "num_questions": 5,
@@ -73,7 +73,7 @@ SECTIONS = [
     },
     {
         "id": 7,
-        "name": "C. Academic Adjustment Behaviors",
+        "name": "Academic Adjustment Behaviors",
         "type": "grid",
         "cols": ["AB", "AC", "AD", "AE", "AF"],
         "num_questions": 5,

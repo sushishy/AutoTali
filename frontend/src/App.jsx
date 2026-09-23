@@ -260,9 +260,6 @@ export default function App() {
                       <span style={{ fontWeight: 600, color: '#fff', fontSize: '0.85rem' }}>
                         {idx + 1}. {sec.name}
                       </span>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                        Cols: {sec.cols.join(', ')}
-                      </p>
                     </div>
                     <span style={{ fontWeight: 600, color: answer ? '#ffffff' : 'var(--text-muted)', fontSize: '0.85rem' }}>
                       {answer ? (Array.isArray(answer) ? `[ ${answer.join(', ')} ]` : `Choice ${answer}`) : 'Pending'}
