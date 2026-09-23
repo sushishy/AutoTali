@@ -105,6 +105,8 @@ export default function App() {
     }
   };
 
+  const [activeTab, setActiveTab] = useState('scanner');
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw' }}>
       <StepHeader
@@ -112,6 +114,13 @@ export default function App() {
         currentStep={currentStepIdx + 1}
         totalSteps={sections.length || 7}
         sectionName={currentSection.name}
+        sections={sections}
+        onSelectStep={(idx) => {
+          setCurrentStepIdx(idx);
+          handleRetake();
+        }}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
 
       {notice && (
@@ -120,28 +129,77 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Grid View */}
-      <main style={{ flex: 1, display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) 340px', gap: 16, padding: 16, overflow: 'hidden' }}>
-        <div style={{ height: '100%', minHeight: 300 }}>
-          <CameraScanner
-            onCapture={handleCapture}
-            frozenImage={frozenOverlay}
-            isProcessing={isProcessing}
-          />
-        </div>
+      {activeTab === 'scanner' ? (
+        /* Main Scanner View */
+        <main style={{ flex: 1, display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) 340px', gap: 16, padding: 16, overflow: 'hidden' }}>
+          <div style={{ height: '100%', minHeight: 300 }}>
+            <CameraScanner
+              onCapture={handleCapture}
+              frozenImage={frozenOverlay}
+              isProcessing={isProcessing}
+            />
+          </div>
 
-        <div style={{ height: '100%' }}>
-          <DetectionReview
-            section={currentSection}
-            detectedVal={detectedVal}
-            onChange={setDetectedVal}
-            onRetake={handleRetake}
-            onConfirm={handleConfirmNext}
-            isLastStep={currentStepIdx === sections.length - 1}
-            isProcessing={isProcessing}
-          />
-        </div>
-      </main>
+          <div style={{ height: '100%' }}>
+            <DetectionReview
+              section={currentSection}
+              detectedVal={detectedVal}
+              onChange={setDetectedVal}
+              onRetake={handleRetake}
+              onConfirm={handleConfirmNext}
+              isLastStep={currentStepIdx === sections.length - 1}
+              isProcessing={isProcessing}
+            />
+          </div>
+        </main>
+      ) : (
+        /* Guide & Summary Tab */
+        <main style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
+          <div style={{ maxWidth: 800, margin: '0 auto', background: 'var(--bg-card)', padding: 24, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <h2 style={{ fontSize: '1.2rem', color: 'var(--accent-primary)', marginBottom: 16 }}>
+              Respondent #{respondentNo} — Scanned Answers Summary
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {sections.map((sec, idx) => {
+                const answer = collectedData[sec.id];
+                const isCurrent = idx === currentStepIdx;
+                return (
+                  <div
+                    key={sec.id}
+                    onClick={() => {
+                      setCurrentStepIdx(idx);
+                      setActiveTab('scanner');
+                      handleRetake();
+                    }}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '12px 16px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: isCurrent ? 'rgba(56, 189, 248, 0.12)' : 'var(--bg-main)',
+                      border: `1px solid ${isCurrent ? 'var(--accent-primary)' : 'var(--border-color)'}`,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div>
+                      <span style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>
+                        {idx + 1}. {sec.name}
+                      </span>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                        Columns: {sec.cols.join(', ')}
+                      </p>
+                    </div>
+                    <span style={{ fontWeight: 700, color: answer ? 'var(--accent-emerald)' : 'var(--text-muted)', fontSize: '0.9rem' }}>
+                      {answer ? (Array.isArray(answer) ? `[ ${answer.join(', ')} ]` : `Choice ${answer}`) : 'Pending ⏳'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </main>
+      )}
     </div>
   );
 }

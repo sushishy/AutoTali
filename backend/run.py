@@ -1,9 +1,12 @@
-"""
-Backend server runner for AutoTally.
-Listens on 0.0.0.0 so both localhost and phone hotspot devices can connect.
-"""
+import sys
+import os
 import uvicorn
 import socket
+
+# Ensure AutoTali root directory is always on python sys.path
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
 
 def get_local_ip():
     try:
