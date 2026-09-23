@@ -77,9 +77,9 @@ class GridDetector:
             for c in range(num_cols):
                 bx1, by1, bx2, by2 = col_boxes[c]
                 is_sel = (c == best_c)
-                cv2.rectangle(overlay, (bx1, by1), (bx2, by2), (0, 230, 0) if is_sel else (140, 140, 140), 2 if is_sel else 1)
+                cv2.rectangle(overlay, (bx1, by1), (bx2, by2), (255, 150, 0) if is_sel else (140, 140, 140), 2 if is_sel else 1)
                 if is_sel:
-                    cv2.circle(overlay, ((bx1 + bx2) // 2, (by1 + by2) // 2), max(4, int(cell_h * 0.15)), (0, 230, 0), -1)
+                    cv2.circle(overlay, ((bx1 + bx2) // 2, (by1 + by2) // 2), max(4, int(cell_h * 0.15)), (255, 150, 0), -1)
 
             cv2.putText(overlay, f"Q{r+1}: {val}", (tx + 10, ry1 + int(cell_h * 0.65)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2, cv2.LINE_AA)

@@ -152,7 +152,6 @@ export default function CameraScanner({
           autoScanEnabled={autoScanEnabled}
           isAutoLocking={isAutoLocking}
           livePreview={livePreview}
-          sectionName={sectionName}
         />
       )}
 

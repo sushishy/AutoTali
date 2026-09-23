@@ -33,12 +33,12 @@ export default function ScannerToolbar({
       {/* Auto-Scan Toggle Button */}
       <button
         onClick={onToggleAutoScan}
-        title={autoScanEnabled ? 'Auto-Scan ON: Automatically captures like a QR scanner' : 'Auto-Scan OFF: Tap shutter manually'}
+        title={autoScanEnabled ? 'Auto-Scan ON' : 'Auto-Scan OFF'}
         style={{
           padding: '4px 7px',
-          background: autoScanEnabled ? 'rgba(34, 197, 94, 0.18)' : 'transparent',
-          color: autoScanEnabled ? '#22c55e' : '#737373',
-          border: autoScanEnabled ? '1px solid #22c55e' : '1px solid transparent',
+          background: autoScanEnabled ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
+          color: autoScanEnabled ? '#3b82f6' : '#737373',
+          border: autoScanEnabled ? '1px solid #3b82f6' : '1px solid transparent',
           borderRadius: 'var(--radius-xs)',
           fontSize: '0.7rem',
           fontWeight: 700,
@@ -48,8 +48,8 @@ export default function ScannerToolbar({
           cursor: 'pointer',
         }}
       >
-        <Zap size={13} fill={autoScanEnabled ? '#22c55e' : 'none'} />
-        <span>{autoScanEnabled ? 'AUTO' : 'MANUAL'}</span>
+        <Zap size={13} fill={autoScanEnabled ? '#3b82f6' : 'none'} />
+        <span>{autoScanEnabled ? 'AUTO' : 'OFF'}</span>
       </button>
 
       <div style={{ width: 1, height: 16, background: 'var(--border-primary)', margin: '0 2px' }} />

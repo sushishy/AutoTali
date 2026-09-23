@@ -63,7 +63,7 @@ class StrandDetector:
         # Draw overlays
         for idx, (bx, by, bw, bh) in enumerate(selected_boxes):
             is_checked = (idx == best_idx and max_score > 0.04)
-            color = (0, 230, 0) if is_checked else (160, 160, 160)
+            color = (255, 150, 0) if is_checked else (160, 160, 160)
             cv2.rectangle(overlay, (bx, by), (bx + bw, by + bh), color, 3 if is_checked else 1)
 
             label = self.LABELS[idx] if idx < len(self.LABELS) else f"Opt {idx + 1}"
@@ -73,7 +73,7 @@ class StrandDetector:
                 cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2 if is_checked else 1, cv2.LINE_AA
             )
             if is_checked:
-                cv2.circle(overlay, (bx + bw // 2, by + bh // 2), int(bw * 0.25), (0, 230, 0), -1)
+                cv2.circle(overlay, (bx + bw // 2, by + bh // 2), int(bw * 0.25), (255, 150, 0), -1)
 
         return detected_choice, overlay, scores, meta
 
