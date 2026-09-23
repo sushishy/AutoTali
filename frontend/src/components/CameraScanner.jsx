@@ -1,16 +1,51 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Camera, AlertCircle } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Camera, AlertCircle, Zap, ZapOff } from 'lucide-react';
 
 export default function CameraScanner({ onCapture, frozenImage, isProcessing }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [cameraError, setCameraError] = useState(null);
+  const [hasTorch, setHasTorch] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
 
   useEffect(() => {
     startCamera();
     return () => stopCamera();
   }, []);
+
+  const checkTorchSupport = (stream) => {
+    try {
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+        if (capabilities.torch) {
+          setHasTorch(true);
+          return;
+        }
+      }
+    } catch (e) {
+      // Capabilities not supported on some platforms
+    }
+    // Still allow attempting torch toggle on modern mobile browsers
+    setHasTorch(true);
+  };
+
+  const toggleTorch = async () => {
+    if (!streamRef.current) return;
+    try {
+      const track = streamRef.current.getVideoTracks()[0];
+      if (track) {
+        const nextState = !torchOn;
+        await track.applyConstraints({
+          advanced: [{ torch: nextState }],
+        });
+        setTorchOn(nextState);
+      }
+    } catch (err) {
+      console.warn('Torch not supported or failed to toggle:', err);
+    }
+  };
 
   const startCamera = async () => {
     try {
@@ -28,6 +63,7 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
+      checkTorchSupport(stream);
       setCameraError(null);
     } catch (err) {
       try {
@@ -36,6 +72,7 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
+        checkTorchSupport(stream);
         setCameraError(null);
       } catch (fallbackErr) {
         setCameraError('Camera access denied or unavailable.');
@@ -90,18 +127,39 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
         <div style={{ position: 'absolute', top: '15%', left: '10%', right: '10%', bottom: '15%', border: '1px dashed #ffffff', opacity: 0.5, borderRadius: 4, pointerEvents: 'none' }} />
       )}
 
-      {/* Minimalist Zoom Controls */}
-      <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 4, background: 'rgba(0,0,0,0.8)', padding: 4, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-primary)' }}>
-        <button onClick={() => setZoomLevel((z) => Math.max(1.0, +(z - 0.2).toFixed(1)))} style={{ padding: '4px 6px', background: 'transparent', border: 'none' }}>
+      {/* Minimalist Controls Toolbar (Flash & Zoom) */}
+      <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 4, background: 'rgba(0,0,0,0.85)', padding: 4, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-primary)', alignItems: 'center' }}>
+        {hasTorch && (
+          <>
+            <button
+              onClick={toggleTorch}
+              title={torchOn ? 'Turn off flash' : 'Turn on flash'}
+              style={{
+                padding: '4px 6px',
+                background: torchOn ? '#ffffff' : 'transparent',
+                color: torchOn ? '#000000' : '#ffffff',
+                border: 'none',
+                borderRadius: 'var(--radius-xs)',
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              {torchOn ? <Zap size={14} fill="#000000" /> : <ZapOff size={14} color="#a3a3a3" />}
+            </button>
+            <div style={{ width: 1, height: 16, background: 'var(--border-primary)', margin: '0 2px' }} />
+          </>
+        )}
+        <button onClick={() => setZoomLevel((z) => Math.max(1.0, +(z - 0.2).toFixed(1)))} style={{ padding: '4px 6px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
           <ZoomOut size={14} />
         </button>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, alignSelf: 'center', minWidth: 28, textAlign: 'center' }}>
           {zoomLevel}x
         </span>
-        <button onClick={() => setZoomLevel((z) => Math.min(3.0, +(z + 0.2).toFixed(1)))} style={{ padding: '4px 6px', background: 'transparent', border: 'none' }}>
+        <button onClick={() => setZoomLevel((z) => Math.min(3.0, +(z + 0.2).toFixed(1)))} style={{ padding: '4px 6px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
           <ZoomIn size={14} />
         </button>
-        <button onClick={() => setZoomLevel(1.0)} style={{ padding: '4px 6px', background: 'transparent', border: 'none' }} title="Reset Zoom">
+        <button onClick={() => setZoomLevel(1.0)} style={{ padding: '4px 6px', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Reset Zoom">
           <RotateCcw size={13} />
         </button>
       </div>
