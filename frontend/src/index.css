@@ -86,30 +86,63 @@ button:disabled {
 .scanner-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(320px, 1fr) 340px;
+  grid-template-columns: minmax(320px, 1fr) 350px;
   gap: 12px;
   padding: 12px;
   overflow: hidden;
 }
 
+.camera-container-box {
+  height: 100%;
+  width: 100%;
+  display: flex;
+}
+
+.review-container-box {
+  height: 100%;
+}
+
 @media (max-width: 768px) {
   .scanner-grid {
+    position: relative;
     display: flex;
     flex-direction: column;
-    padding: 8px;
-    gap: 8px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
   }
 
   .camera-container-box {
-    height: 48vh !important;
-    min-height: 260px !important;
-    max-height: 380px !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100% !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    border-radius: 0;
   }
 
+  /* Popup Bottom Card on Phone Screen */
   .review-container-box {
-    flex: 1 !important;
-    min-height: 280px !important;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 75vh;
+    z-index: 50;
+    border-radius: 16px 16px 0 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .review-container-box.hidden-mobile {
+    transform: translateY(105%);
+    pointer-events: none;
   }
 }

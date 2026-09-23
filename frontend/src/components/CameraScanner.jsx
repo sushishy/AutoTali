@@ -1,13 +1,25 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Camera, AlertCircle, Zap, ZapOff } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Camera, AlertCircle, Zap, ZapOff, Maximize, Minimize } from 'lucide-react';
 
 export default function CameraScanner({ onCapture, frozenImage, isProcessing }) {
+  const containerRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [cameraError, setCameraError] = useState(null);
   const [hasTorch, setHasTorch] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+      setIsFullscreen(false);
+    }
+  };
 
   useEffect(() => {
     startCamera();
@@ -202,6 +214,14 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
         </button>
         <button onClick={() => setZoomLevel(1.0)} style={{ padding: '4px 6px', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Reset Zoom">
           <RotateCcw size={13} />
+        </button>
+        <div style={{ width: 1, height: 16, background: 'var(--border-primary)', margin: '0 2px' }} />
+        <button
+          onClick={toggleFullscreen}
+          style={{ padding: '4px 6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+          title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Camera'}
+        >
+          {isFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
         </button>
       </div>
 

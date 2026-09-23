@@ -15,12 +15,23 @@ export default function DetectionReview({
   const isStrand = section.type === 'strand';
 
   return (
-    <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', height: '100%', border: '1px solid var(--border-primary)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <span style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-          Review Answers
-        </span>
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Tap to edit</span>
+    <div style={{ background: 'var(--bg-secondary)', padding: '12px 16px 16px 16px', borderRadius: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', border: '1px solid var(--border-primary)' }}>
+      {/* Mobile Modal Grab Bar */}
+      <div style={{ width: 36, height: 4, background: '#404040', borderRadius: 2, margin: '0 auto 10px auto' }} />
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div>
+          <span style={{ fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#ffffff' }}>
+            {section.name}
+          </span>
+          <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>Detected from photo &bull; Tap to adjust</p>
+        </div>
+        <button
+          onClick={onRetake}
+          style={{ padding: '4px 8px', fontSize: '0.72rem', background: 'transparent', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
+        >
+          Retake Photo
+        </button>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>

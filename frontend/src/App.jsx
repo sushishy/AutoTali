@@ -206,7 +206,7 @@ export default function App() {
         </main>
       ) : activeTab === 'scanner' ? (
         <main className="scanner-grid">
-          <div className="camera-container-box" style={{ height: '100%', minHeight: 280 }}>
+          <div className="camera-container-box">
             <CameraScanner
               onCapture={handleCapture}
               frozenImage={frozenOverlay}
@@ -214,7 +214,7 @@ export default function App() {
             />
           </div>
 
-          <div className="review-container-box" style={{ height: '100%' }}>
+          <div className={`review-container-box ${frozenOverlay || detectedVal ? '' : 'hidden-mobile'}`}>
             <DetectionReview
               section={currentSection}
               detectedVal={detectedVal}
