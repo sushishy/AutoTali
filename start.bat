@@ -1,17 +1,15 @@
 @echo off
-title AutoTally Unified Web Scanner
-echo ========================================================
-echo        AutoTally Unified Web Scanner (Single Tab)
-echo ========================================================
-echo.
-
+title AutoTally Scanner
 cd /d "%~dp0"
 
-echo Setting up USB reverse port mapping (for zero-latency USB tethering)...
+echo ========================================================
+echo        AutoTally Unified Web Scanner
+echo ========================================================
+echo.
+
+:: Setup USB reverse port mapping silently
 adb reverse tcp:8000 tcp:8000 >nul 2>&1
 
-echo.
-echo Launching unified server & opening single browser tab at http://localhost:8000...
-python -m backend.run
+:: Run unified server in this same single window
+python backend\run.py
 
-pause
