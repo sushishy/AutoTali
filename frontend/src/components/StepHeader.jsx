@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Camera, FileText, Smartphone, Laptop, Check, Copy } from 'lucide-react';
+import { Camera, FileText, Smartphone, Laptop, Check, Copy, Edit3 } from 'lucide-react';
 
 export default function StepHeader({
   respondentNo,
@@ -57,6 +57,19 @@ export default function StepHeader({
 
         {/* View Tabs */}
         <div style={{ display: 'flex', gap: 4 }}>
+          <button
+            onClick={() => onTabChange('manual')}
+            style={{
+              padding: '6px 12px',
+              fontSize: '0.75rem',
+              background: activeTab === 'manual' ? '#ffffff' : 'transparent',
+              color: activeTab === 'manual' ? '#000000' : 'var(--text-secondary)',
+              borderColor: activeTab === 'manual' ? '#ffffff' : 'var(--border-primary)',
+              fontWeight: 600,
+            }}
+          >
+            <Edit3 size={13} /> Manual
+          </button>
           <button
             onClick={() => onTabChange('scanner')}
             style={{

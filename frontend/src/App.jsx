@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import StepHeader from './components/StepHeader';
 import CameraScanner from './components/CameraScanner';
 import DetectionReview from './components/DetectionReview';
+import ManualEntry from './components/ManualEntry';
 
 export default function App() {
   const [sections, setSections] = useState([]);
@@ -60,6 +61,15 @@ export default function App() {
     }
   };
 
+  const goToStep = (idx) => {
+    setCurrentStepIdx(idx);
+    const targetSection = sections[idx];
+    const existing = targetSection ? collectedData[targetSection.id] : null;
+    setDetectedVal(existing !== undefined ? existing : null);
+    setFrozenOverlay(null);
+    setNotice(null);
+  };
+
   const handleRetake = () => {
     setFrozenOverlay(null);
     setDetectedVal(null);
@@ -71,8 +81,13 @@ export default function App() {
     setCollectedData(updatedCollected);
 
     if (currentStepIdx < sections.length - 1) {
-      setCurrentStepIdx((idx) => idx + 1);
-      handleRetake();
+      const nextIdx = currentStepIdx + 1;
+      setCurrentStepIdx(nextIdx);
+      const nextSec = sections[nextIdx];
+      const existingNext = nextSec ? updatedCollected[nextSec.id] : null;
+      setDetectedVal(existingNext !== undefined ? existingNext : null);
+      setFrozenOverlay(null);
+      setNotice(null);
     } else {
       setIsProcessing(true);
       setNotice('Saving row to Tally.xlsx...');
@@ -112,10 +127,7 @@ export default function App() {
         totalSteps={sections.length || 7}
         sectionName={currentSection.name}
         sections={sections}
-        onSelectStep={(idx) => {
-          setCurrentStepIdx(idx);
-          handleRetake();
-        }}
+        onSelectStep={(idx) => goToStep(idx)}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         localIp={localIp}
@@ -127,7 +139,20 @@ export default function App() {
         </div>
       )}
 
-      {activeTab === 'scanner' ? (
+      {activeTab === 'manual' ? (
+        <main style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          <ManualEntry
+            section={currentSection}
+            currentVal={detectedVal}
+            onChange={setDetectedVal}
+            onConfirm={handleConfirmNext}
+            isLastStep={currentStepIdx === sections.length - 1}
+            isProcessing={isProcessing}
+            totalSteps={sections.length || 7}
+            currentStepIndex={currentStepIdx}
+          />
+        </main>
+      ) : activeTab === 'scanner' ? (
         <main className="scanner-grid">
           <div className="camera-container-box" style={{ height: '100%', minHeight: 280 }}>
             <CameraScanner
@@ -164,7 +189,6 @@ export default function App() {
                     key={sec.id}
                     onClick={() => {
                       setCurrentStepIdx(idx);
-                      setActiveTab('scanner');
                       handleRetake();
                     }}
                     style={{
