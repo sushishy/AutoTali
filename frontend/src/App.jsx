@@ -6,15 +6,47 @@ import ManualEntry from './components/ManualEntry';
 
 export default function App() {
   const [sections, setSections] = useState([]);
-  const [currentStepIdx, setCurrentStepIdx] = useState(0);
-  const [respondentNo, setRespondentNo] = useState(16);
+  const [currentStepIdx, setCurrentStepIdx] = useState(() => {
+    const saved = localStorage.getItem('autotali_step');
+    return saved !== null ? parseInt(saved, 10) : 0;
+  });
+  const [respondentNo, setRespondentNo] = useState(() => {
+    const saved = localStorage.getItem('autotali_resp');
+    return saved !== null ? parseInt(saved, 10) : 16;
+  });
   const [localIp, setLocalIp] = useState('');
-  const [collectedData, setCollectedData] = useState({});
+  const [collectedData, setCollectedData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('autotali_data');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
   const [frozenOverlay, setFrozenOverlay] = useState(null);
   const [detectedVal, setDetectedVal] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [notice, setNotice] = useState(null);
-  const [activeTab, setActiveTab] = useState('scanner');
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('autotali_tab') || 'scanner';
+  });
+
+  // Sync to localStorage
+  useEffect(() => {
+    localStorage.setItem('autotali_step', currentStepIdx);
+  }, [currentStepIdx]);
+
+  useEffect(() => {
+    localStorage.setItem('autotali_resp', respondentNo);
+  }, [respondentNo]);
+
+  useEffect(() => {
+    localStorage.setItem('autotali_data', JSON.stringify(collectedData));
+  }, [collectedData]);
+
+  useEffect(() => {
+    localStorage.setItem('autotali_tab', activeTab);
+  }, [activeTab]);
 
   useEffect(() => {
     fetchStatus();
@@ -24,9 +56,20 @@ export default function App() {
     try {
       const res = await fetch('/api/status');
       const data = await res.json();
-      setSections(data.sections || []);
-      setRespondentNo(data.next_respondent_no || 16);
+      const secs = data.sections || [];
+      setSections(secs);
+      // If no saved respondent in localStorage, use backend next
+      if (!localStorage.getItem('autotali_resp')) {
+        setRespondentNo(data.next_respondent_no || 16);
+      }
       setLocalIp(data.local_ip || '');
+
+      // Restore active value for the restored step if available
+      const savedStep = parseInt(localStorage.getItem('autotali_step') || '0', 10);
+      const activeSec = secs[savedStep];
+      if (activeSec && collectedData[activeSec.id] !== undefined) {
+        setDetectedVal(collectedData[activeSec.id]);
+      }
     } catch (err) {
       console.warn('API connection check:', err);
     }
