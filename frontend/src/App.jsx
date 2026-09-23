@@ -166,6 +166,7 @@ export default function App() {
         <main className="scanner-grid">
           <div className="camera-container-box">
             <CameraScanner
+              section={currentSection}
               sectionId={currentSection.id}
               sectionName={currentSection.name}
               onCapture={handleCapture}

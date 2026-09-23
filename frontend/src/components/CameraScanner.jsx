@@ -6,8 +6,8 @@ import ScannerViewfinder from './scanner/ScannerViewfinder';
 import ScannerShutter from './scanner/ScannerShutter';
 
 export default function CameraScanner({
+  section = { type: 'grid' },
   sectionId = 1,
-  sectionName = '',
   onCapture,
   onAutoLock,
   frozenImage,
@@ -18,19 +18,30 @@ export default function CameraScanner({
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [rotation, setRotation] = useState(() => {
+    const saved = localStorage.getItem('autotali_cam_rot');
+    return saved !== null ? parseInt(saved, 10) : 0;
+  });
   const [cameraError, setCameraError] = useState(null);
   const [hasTorch, setHasTorch] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const { autoScanEnabled, toggleAutoScan, livePreview, isAutoLocking } = useAutoScan({
+  const { autoScanEnabled, toggleAutoScan, livePreview, liveAnswers, isAutoLocking } = useAutoScan({
     videoRef,
     sectionId,
     frozenImage,
     isProcessing,
     zoomLevel,
+    rotation,
     onAutoLock,
   });
+
+  const handleRotate = () => {
+    const next = (rotation + 90) % 360;
+    setRotation(next);
+    localStorage.setItem('autotali_cam_rot', String(next));
+  };
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -64,8 +75,13 @@ export default function CameraScanner({
   const startCamera = async () => {
     try {
       stopCamera();
+      const isPortrait = window.innerHeight > window.innerWidth;
       const constraints = {
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: isPortrait ? 1080 : 1920 },
+          height: { ideal: isPortrait ? 1920 : 1080 },
+        },
         audio: false,
       };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -96,18 +112,24 @@ export default function CameraScanner({
   const captureFrame = () => {
     if (!videoRef.current) return;
     const video = videoRef.current;
+    const rawW = video.videoWidth || 1280;
+    const rawH = video.videoHeight || 720;
+    const isSideways = rotation === 90 || rotation === 270;
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
+    canvas.width = isSideways ? rawH : rawW;
+    canvas.height = isSideways ? rawW : rawH;
     const ctx = canvas.getContext('2d');
 
-    if (zoomLevel > 1.0) {
-      const cropW = canvas.width / zoomLevel;
-      const cropH = canvas.height / zoomLevel;
-      ctx.drawImage(video, (canvas.width - cropW) / 2, (canvas.height - cropH) / 2, cropW, cropH, 0, 0, canvas.width, canvas.height);
-    } else {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    if (rotation !== 0) {
+      ctx.rotate((rotation * Math.PI) / 180);
     }
+    if (zoomLevel > 1.0) {
+      ctx.scale(zoomLevel, zoomLevel);
+    }
+    ctx.drawImage(video, -rawW / 2, -rawH / 2, rawW, rawH);
+    ctx.restore();
 
     onCapture?.(canvas.toDataURL('image/jpeg', 0.9));
   };
@@ -134,7 +156,11 @@ export default function CameraScanner({
     <div style={{ position: 'relative', width: '100%', height: '100%', background: '#0a0a0a', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {/* Captured Frozen Image Overlay */}
       {frozenImage && (
-        <img src={frozenImage} alt="Capture Overlay" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', zIndex: 2, background: '#0a0a0a' }} />
+        <img
+          src={frozenImage}
+          alt="Capture Overlay"
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', zIndex: 3, background: '#0a0a0a' }}
+        />
       )}
 
       {/* Persistent Live Video Feed */}
@@ -143,14 +169,24 @@ export default function CameraScanner({
         autoPlay
         playsInline
         muted
-        style={{ width: '100%', height: '100%', objectFit: 'contain', transform: `scale(${zoomLevel})`, transition: 'transform 0.1s ease-out', display: frozenImage ? 'none' : 'block' }}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          transform: `rotate(${rotation}deg) scale(${zoomLevel})`,
+          transition: 'transform 0.15s ease-out',
+          display: frozenImage ? 'none' : 'block',
+        }}
       />
 
-      {/* Viewfinder Target Framing */}
+      {/* Viewfinder Target Framing with Steady Guide Grid & Active Glowing Dots */}
       {!frozenImage && (
         <ScannerViewfinder
+          section={section}
+          rotation={rotation}
           autoScanEnabled={autoScanEnabled}
           isAutoLocking={isAutoLocking}
+          liveAnswers={liveAnswers}
           livePreview={livePreview}
         />
       )}
@@ -166,12 +202,14 @@ export default function CameraScanner({
         onZoomIn={() => setZoomLevel((z) => Math.min(3.0, +(z + 0.2).toFixed(1)))}
         onZoomOut={() => setZoomLevel((z) => Math.max(1.0, +(z - 0.2).toFixed(1)))}
         onResetZoom={() => setZoomLevel(1.0)}
+        rotation={rotation}
+        onRotate={handleRotate}
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
       />
 
       {cameraError && (
-        <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', gap: 6, background: '#171717', border: '1px solid #404040', color: '#fff', padding: '10px 14px', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem' }}>
+        <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', gap: 6, background: '#171717', border: '1px solid #404040', color: '#fff', padding: '10px 14px', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', zIndex: 20 }}>
           <AlertCircle size={15} /> {cameraError}
         </div>
       )}

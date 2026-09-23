@@ -1,5 +1,5 @@
 import React from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Zap, ZapOff, Maximize, Minimize } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, RotateCw, Zap, ZapOff, Maximize, Minimize } from 'lucide-react';
 
 export default function ScannerToolbar({
   autoScanEnabled,
@@ -11,6 +11,8 @@ export default function ScannerToolbar({
   onZoomIn,
   onZoomOut,
   onResetZoom,
+  rotation = 0,
+  onRotate,
   isFullscreen,
   onToggleFullscreen,
 }) {
@@ -27,29 +29,54 @@ export default function ScannerToolbar({
         borderRadius: 'var(--radius-sm)',
         border: '1px solid var(--border-primary)',
         alignItems: 'center',
-        zIndex: 10,
+        zIndex: 30,
       }}
     >
-      {/* Auto-Scan Toggle Button */}
+      {/* Auto / Manual Mode Toggle Button */}
       <button
+        type="button"
         onClick={onToggleAutoScan}
-        title={autoScanEnabled ? 'Auto-Scan ON' : 'Auto-Scan OFF'}
+        title={autoScanEnabled ? 'Auto Mode: ON (Scanning automatically)' : 'Manual Mode: ON (Tap shutter button to capture)'}
         style={{
-          padding: '4px 7px',
-          background: autoScanEnabled ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
-          color: autoScanEnabled ? '#3b82f6' : '#737373',
-          border: autoScanEnabled ? '1px solid #3b82f6' : '1px solid transparent',
+          padding: '5px 9px',
+          background: autoScanEnabled ? 'rgba(59, 130, 246, 0.22)' : 'rgba(255, 255, 255, 0.08)',
+          color: autoScanEnabled ? '#3b82f6' : '#a3a3a3',
+          border: autoScanEnabled ? '1px solid #3b82f6' : '1px solid rgba(255, 255, 255, 0.2)',
           borderRadius: 'var(--radius-xs)',
-          fontSize: '0.7rem',
+          fontSize: '0.72rem',
           fontWeight: 700,
           display: 'flex',
           alignItems: 'center',
           gap: 4,
           cursor: 'pointer',
+          touchAction: 'manipulation',
+          userSelect: 'none',
         }}
       >
         <Zap size={13} fill={autoScanEnabled ? '#3b82f6' : 'none'} />
-        <span>{autoScanEnabled ? 'AUTO' : 'OFF'}</span>
+        <span>{autoScanEnabled ? 'AUTO' : 'MANUAL'}</span>
+      </button>
+
+      <div style={{ width: 1, height: 16, background: 'var(--border-primary)', margin: '0 2px' }} />
+
+      {/* Rotation Button (Portrait / Landscape flip) */}
+      <button
+        onClick={onRotate}
+        title={`Rotate 90° for Portrait/Landscape (currently ${rotation}°)`}
+        style={{
+          padding: '4px 6px',
+          background: rotation !== 0 ? 'rgba(59, 130, 246, 0.22)' : 'transparent',
+          color: rotation !== 0 ? '#3b82f6' : '#ffffff',
+          border: 'none',
+          borderRadius: 'var(--radius-xs)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          cursor: 'pointer',
+        }}
+      >
+        <RotateCw size={14} />
+        {rotation !== 0 && <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>{rotation}°</span>}
       </button>
 
       <div style={{ width: 1, height: 16, background: 'var(--border-primary)', margin: '0 2px' }} />
