@@ -15,11 +15,23 @@ def get_local_ip():
     except Exception:
         return "127.0.0.1"
 
+import webbrowser
+import threading
+import time
+
+def open_browser():
+    time.sleep(1.2)
+    webbrowser.open("http://localhost:8000")
+
 if __name__ == "__main__":
     local_ip = get_local_ip()
     print("=" * 60)
-    print("🚀 AutoTally Backend API Starting...")
+    print("🚀 AutoTally Unified Web Scanner (Single Tab & Single Server)")
     print(f"👉 Local Access:   http://localhost:8000")
-    print(f"👉 Hotspot/Phone:  http://{local_ip}:8000")
+    print(f"👉 Phone/Hotspot:  http://{local_ip}:8000")
     print("=" * 60)
+
+    # Automatically launch your browser in 1 tab
+    threading.Thread(target=open_browser, daemon=True).start()
+
     uvicorn.run("backend.app:app", host="0.0.0.0", port=8000, reload=False)

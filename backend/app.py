@@ -1,12 +1,11 @@
-"""
-FastAPI Server for AutoTally Web Application.
-Provides endpoints for survey status, detection processing, and writing to Tally.xlsx.
-"""
+import os
 import base64
 import cv2
 import numpy as np
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
 
@@ -105,3 +104,22 @@ def save_survey(payload: SaveRequest):
         "message": message,
         "next_respondent_no": next_resp_no,
     }
+
+
+# Mount the React Frontend build directly — single server, single port, single tab!
+FRONTEND_DIST = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+
+if os.path.exists(FRONTEND_DIST):
+    # Serve assets folder
+    assets_dir = os.path.join(FRONTEND_DIST, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    # Serve index.html for all page requests
+    @app.get("/{full_path:path}")
+    def serve_frontend(full_path: str):
+        target = os.path.join(FRONTEND_DIST, full_path)
+        if full_path and os.path.isfile(target):
+            return FileResponse(target)
+        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
+

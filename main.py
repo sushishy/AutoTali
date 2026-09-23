@@ -1,19 +1,18 @@
 """
 AutoTally — Questionnaire OMR Scanner
-Main Application Entry Point
+Main Application Entry Point (Unified Web App)
 """
 import sys
-from ui import run_app
-
+import subprocess
+import os
 
 def main():
-    print("Starting AutoTally Questionnaire Scanner...")
+    backend_run = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backend", "run.py")
     try:
-        run_app()
+        subprocess.run([sys.executable, backend_run])
     except KeyboardInterrupt:
         print("\nAutoTally exited by user.")
         sys.exit(0)
-
 
 if __name__ == "__main__":
     main()
