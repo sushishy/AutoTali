@@ -5,6 +5,9 @@ set "PROJECT_DIR=%~dp0"
 if "%PROJECT_DIR:~-1%"=="\" set "PROJECT_DIR=%PROJECT_DIR:~0,-1%"
 cd /d "%PROJECT_DIR%"
 
+set "PYTHON_EXE=python"
+where py.exe >nul 2>&1 && set "PYTHON_EXE=py"
+
 :: Clean up any stale port 8000 processes to prevent port conflict
 powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | ForEach-Object { if ($_.OwningProcess -gt 0) { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue } }" >nul 2>&1
 
@@ -30,9 +33,9 @@ start /b powershell -NoProfile -Command "Start-Sleep -Milliseconds 2000; Start-P
 :: Check if Windows Terminal (wt.exe) is available
 where wt.exe >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
-    start wt -d "%PROJECT_DIR%" --title "AutoTali Server" cmd /k "python backend\run.py" ; new-tab -d "%PROJECT_DIR%" --title "Phone & Hotspot Info" powershell -NoProfile -ExecutionPolicy Bypass -File "%PROJECT_DIR%\tools\phone_monitor.ps1"
+    start wt -d "%PROJECT_DIR%" --title "AutoTali Server" cmd /k ""%PYTHON_EXE%" backend\run.py" ; new-tab -d "%PROJECT_DIR%" --title "Phone & Hotspot Info" powershell -NoProfile -ExecutionPolicy Bypass -File "%PROJECT_DIR%\tools\phone_monitor.ps1"
 ) else (
-    start "AutoTali Server" cmd /k "python backend\run.py"
+    start "AutoTali Server" cmd /k ""%PYTHON_EXE%" backend\run.py"
 )
 
 echo.

@@ -29,4 +29,5 @@ if __name__ == "__main__":
     print("  Keep this window open while scanning.")
     print("------------------------------------------------------------")
 
-    uvicorn.run("backend.app:app", host="0.0.0.0", port=8000, reload=False)
+    from backend.app import app
+    uvicorn.run(app, host="0.0.0.0", port=8000)
