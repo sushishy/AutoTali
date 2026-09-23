@@ -1,7 +1,17 @@
 import React from 'react';
-import { RotateCcw, ArrowRight, Save, Check } from 'lucide-react';
+import { RotateCcw, ArrowRight, Save, Check, ChevronLeft } from 'lucide-react';
 
-export default function DetectionReview({ section, detectedVal, onChange, onRetake, onConfirm, isLastStep, isProcessing }) {
+export default function DetectionReview({
+  section,
+  detectedVal,
+  onChange,
+  onRetake,
+  onConfirm,
+  onPrevious,
+  canGoBack,
+  isLastStep,
+  isProcessing,
+}) {
   const isStrand = section.type === 'strand';
 
   return (
@@ -99,7 +109,27 @@ export default function DetectionReview({ section, detectedVal, onChange, onReta
       </div>
 
       {/* Action Buttons */}
-      <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+      <div style={{ display: 'flex', gap: 6, marginTop: 14 }}>
+        {canGoBack && (
+          <button
+            onClick={onPrevious}
+            disabled={isProcessing}
+            title="Go back to previous section"
+            style={{
+              padding: '10px 12px',
+              fontSize: '0.85rem',
+              background: 'transparent',
+              color: '#ffffff',
+              borderColor: 'var(--border-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <ChevronLeft size={15} /> Back
+          </button>
+        )}
+
         <button
           onClick={onRetake}
           disabled={isProcessing}

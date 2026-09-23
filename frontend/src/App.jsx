@@ -70,6 +70,12 @@ export default function App() {
     setNotice(null);
   };
 
+  const handlePreviousStep = () => {
+    if (currentStepIdx > 0) {
+      goToStep(currentStepIdx - 1);
+    }
+  };
+
   const handleRetake = () => {
     setFrozenOverlay(null);
     setDetectedVal(null);
@@ -147,6 +153,8 @@ export default function App() {
             currentVal={detectedVal}
             onChange={setDetectedVal}
             onConfirm={handleConfirmNext}
+            onPrevious={handlePreviousStep}
+            canGoBack={currentStepIdx > 0}
             isLastStep={currentStepIdx === sections.length - 1}
             isProcessing={isProcessing}
             totalSteps={sections.length || 7}
@@ -170,6 +178,8 @@ export default function App() {
               onChange={setDetectedVal}
               onRetake={handleRetake}
               onConfirm={handleConfirmNext}
+              onPrevious={handlePreviousStep}
+              canGoBack={currentStepIdx > 0}
               isLastStep={currentStepIdx === sections.length - 1}
               isProcessing={isProcessing}
             />

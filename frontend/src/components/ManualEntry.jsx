@@ -1,11 +1,13 @@
 import React from 'react';
-import { ArrowRight, Save, Check } from 'lucide-react';
+import { ArrowRight, Save, Check, ChevronLeft } from 'lucide-react';
 
 export default function ManualEntry({
   section,
   currentVal,
   onChange,
   onConfirm,
+  onPrevious,
+  canGoBack,
   isLastStep,
   isProcessing,
   totalSteps,
@@ -178,7 +180,30 @@ export default function ManualEntry({
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+          {canGoBack ? (
+            <button
+              type="button"
+              onClick={onPrevious}
+              disabled={isProcessing}
+              style={{
+                padding: '12px 18px',
+                fontSize: '0.9rem',
+                background: 'transparent',
+                color: '#ffffff',
+                border: '1px solid var(--border-primary)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                borderRadius: 'var(--radius-sm)',
+              }}
+            >
+              <ChevronLeft size={16} /> Back
+            </button>
+          ) : <div />}
+
           <button
             type="button"
             onClick={onConfirm}
