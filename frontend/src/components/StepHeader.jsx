@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, FileText, Smartphone, Laptop, Check, Copy, Edit3, Hash, ChevronDown, Plus, FileSpreadsheet } from 'lucide-react';
+import { Camera, FileText, Smartphone, Check, Copy, Edit3, Hash, ChevronDown, FileSpreadsheet, Plus } from 'lucide-react';
 
 export default function StepHeader({
   respondentNo,
@@ -22,8 +22,7 @@ export default function StepHeader({
   const [tempResp, setTempResp] = useState(respondentNo);
   const [modeDropdownOpen, setModeDropdownOpen] = useState(false);
   const [fileDropdownOpen, setFileDropdownOpen] = useState(false);
-  const [isCreatingFile, setIsCreatingFile] = useState(false);
-  const [newFileName, setNewFileName] = useState('');
+
 
   const phoneUrl = `http://${localIp || 'localhost'}:8000`;
 
@@ -41,14 +40,6 @@ export default function StepHeader({
     setIsEditingResp(false);
   };
 
-  const submitNewFile = () => {
-    if (newFileName.trim() && onCreateNewFile) {
-      onCreateNewFile(newFileName.trim());
-      setNewFileName('');
-      setIsCreatingFile(false);
-      setFileDropdownOpen(false);
-    }
-  };
 
   const modeLabels = {
     scanner: { label: 'Scanner', icon: Camera },
@@ -299,61 +290,30 @@ export default function StepHeader({
 
                 <div style={{ height: 1, background: 'var(--border-primary)', margin: '4px 0' }} />
 
-                {isCreatingFile ? (
-                  <div style={{ padding: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <input
-                      type="text"
-                      placeholder="e.g. Section_B.xlsx"
-                      value={newFileName}
-                      onChange={(e) => setNewFileName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') submitNewFile();
-                        if (e.key === 'Escape') setIsCreatingFile(false);
-                      }}
-                      autoFocus
-                      style={{
-                        padding: '6px 8px',
-                        fontSize: '0.75rem',
-                        background: '#000000',
-                        color: '#ffffff',
-                        border: '1px solid var(--border-primary)',
-                        borderRadius: 'var(--radius-xs)',
-                      }}
-                    />
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button
-                        onClick={submitNewFile}
-                        style={{ flex: 1, padding: 6, fontSize: '0.72rem', background: '#ffffff', color: '#000000', fontWeight: 700 }}
-                      >
-                        Create Empty
-                      </button>
-                      <button
-                        onClick={() => setIsCreatingFile(false)}
-                        style={{ padding: 6, fontSize: '0.72rem', background: 'transparent', color: '#a3a3a3' }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setIsCreatingFile(true)}
-                    style={{
-                      padding: '8px 10px',
-                      fontSize: '0.75rem',
-                      background: 'transparent',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: 'var(--radius-xs)',
-                      justifyContent: 'flex-start',
-                      width: '100%',
-                      fontWeight: 600,
-                      gap: 6,
-                    }}
-                  >
-                    <Plus size={13} /> New Empty File...
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setFileDropdownOpen(false);
+                    const name = window.prompt('Enter filename for new empty file:\n(e.g. Section_B)');
+                    if (name && name.trim() && onCreateNewFile) {
+                      onCreateNewFile(name.trim());
+                    }
+                  }}
+                  style={{
+                    padding: '8px 10px',
+                    fontSize: '0.75rem',
+                    background: 'transparent',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: 'var(--radius-xs)',
+                    justifyContent: 'flex-start',
+                    width: '100%',
+                    fontWeight: 600,
+                    gap: 6,
+                  }}
+                >
+                  <Plus size={13} /> New Empty File...
+                </button>
+
               </div>
             )}
           </div>

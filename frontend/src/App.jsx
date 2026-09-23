@@ -275,6 +275,8 @@ export default function App() {
               onCapture={handleCapture}
               frozenImage={frozenOverlay}
               isProcessing={isProcessing}
+              onViewAnswers={() => setIsCardOpen(true)}
+              hasResult={!isCardOpen && (frozenOverlay !== null || detectedVal !== null)}
             />
           </div>
 
@@ -292,29 +294,6 @@ export default function App() {
               isProcessing={isProcessing}
             />
           </div>
-
-          {/* Floating Pill to Reopen Card on Phone if dismissed */}
-          {!isCardOpen && (frozenOverlay || detectedVal) && (
-            <button
-              onClick={() => setIsCardOpen(true)}
-              style={{
-                position: 'absolute',
-                bottom: 16,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: 40,
-                padding: '8px 16px',
-                fontSize: '0.8rem',
-                background: '#ffffff',
-                color: '#000000',
-                borderRadius: 20,
-                fontWeight: 700,
-                boxShadow: '0 4px 14px rgba(0,0,0,0.6)',
-              }}
-            >
-              View Answers &rarr;
-            </button>
-          )}
         </main>
       ) : (
         <main style={{ flex: 1, padding: 20, overflowY: 'auto' }}>

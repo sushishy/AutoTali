@@ -73,6 +73,11 @@ button:disabled {
   border-radius: 3px;
 }
 
+/* "View Answers" pill — only needed on mobile where the card is hidden */
+.view-answers-pill {
+  display: none !important;
+}
+
 /* Responsive Layout */
 .app-container {
   display: flex;
@@ -149,6 +154,11 @@ button:disabled {
   /* Compact header on small screens */
   .phone-url-text {
     display: none !important;
+  }
+
+  /* Show "View Answers" pill only on mobile */
+  .view-answers-pill {
+    display: inline-flex !important;
   }
 
   .active-file-label {

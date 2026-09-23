@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ZoomIn, ZoomOut, RotateCcw, Camera, AlertCircle, Zap, ZapOff, Maximize, Minimize } from 'lucide-react';
 
-export default function CameraScanner({ onCapture, frozenImage, isProcessing }) {
+export default function CameraScanner({ onCapture, frozenImage, isProcessing, onViewAnswers, hasResult }) {
   const containerRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -231,27 +231,52 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
         </div>
       )}
 
-      {/* Minimalist Shutter Button */}
-      {!frozenImage && (
-        <div style={{ position: 'absolute', bottom: 18, zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-          {/* Direct Camera Shutter */}
+      {/* Minimalist Shutter & Action Controls */}
+      <div style={{ position: 'absolute', bottom: 18, zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        {/* View Answers Button placed directly on top of the camera button */}
+        {hasResult && onViewAnswers && (
           <button
-            onClick={captureFrame}
-            disabled={isProcessing}
+            onClick={onViewAnswers}
+            className="view-answers-pill"
             style={{
-              width: 58,
-              height: 58,
-              borderRadius: '50%',
-              background: '#000000',
-              border: '2px solid #ffffff',
+              padding: '8px 18px',
+              fontSize: '0.8rem',
+              background: '#ffffff',
+              color: '#000000',
+              border: '1px solid #ffffff',
+              borderRadius: 20,
+              fontWeight: 700,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.8)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: 6,
               cursor: 'pointer',
             }}
           >
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#ffffff' }} />
+            <span>View Answers</span> &rarr;
           </button>
+        )}
+
+        {/* Direct Camera Shutter */}
+        <button
+          onClick={captureFrame}
+          disabled={isProcessing}
+          title={frozenImage ? "Tap to retake / snap another photo" : "Capture photo"}
+          style={{
+            width: 58,
+            height: 58,
+            borderRadius: '50%',
+            background: '#000000',
+            border: '2px solid #ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.6)',
+          }}
+        >
+          <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#ffffff' }} />
+        </button>
 
           {/* Native Phone Camera Fallback (Works on HTTP without SSL restrictions!) */}
           <label
@@ -289,7 +314,6 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
             />
           </label>
         </div>
-      )}
     </div>
   );
 }
