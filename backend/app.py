@@ -38,6 +38,14 @@ class SaveRequest(BaseModel):
     data: Dict[int, Any]  # {1: 2, 2: [5,4,3,2,1], ...}
 
 
+class NewSheetRequest(BaseModel):
+    filename: str
+
+
+class SwitchSheetRequest(BaseModel):
+    filename: str
+
+
 def get_local_ip():
     import socket
     try:
@@ -52,15 +60,52 @@ def get_local_ip():
 
 @app.get("/api/status")
 def get_status():
-    """Returns current scanning status, next respondent info, IP addresses, and section schemas."""
+    """Returns current scanning status, next respondent info, IP addresses, section schemas, and sheets."""
     next_row, next_resp_no = excel_writer.get_next_respondent_info()
     return {
         "next_row": next_row,
         "next_respondent_no": next_resp_no,
         "excel_path": excel_writer.excel_path,
+        "active_file": os.path.basename(excel_writer.excel_path),
+        "available_files": excel_writer.list_sheets(),
         "sections": config.SECTIONS,
         "local_ip": get_local_ip(),
         "port": 8000,
+    }
+
+
+@app.post("/api/sheets/new")
+def create_new_sheet(payload: NewSheetRequest):
+    """Creates a new empty formatted Excel workbook with custom name."""
+    clean_name = payload.filename.strip()
+    if not clean_name:
+        raise HTTPException(status_code=400, detail="Filename cannot be empty")
+    success, msg = excel_writer.create_new_template(clean_name)
+    if not success:
+        raise HTTPException(status_code=400, detail=msg)
+    next_row, next_resp_no = excel_writer.get_next_respondent_info()
+    return {
+        "success": True,
+        "message": msg,
+        "active_file": os.path.basename(excel_writer.excel_path),
+        "available_files": excel_writer.list_sheets(),
+        "next_respondent_no": next_resp_no,
+    }
+
+
+@app.post("/api/sheets/switch")
+def switch_sheet(payload: SwitchSheetRequest):
+    """Switches active target Excel file."""
+    success, msg = excel_writer.switch_file(payload.filename)
+    if not success:
+        raise HTTPException(status_code=400, detail=msg)
+    next_row, next_resp_no = excel_writer.get_next_respondent_info()
+    return {
+        "success": True,
+        "message": msg,
+        "active_file": os.path.basename(excel_writer.excel_path),
+        "available_files": excel_writer.list_sheets(),
+        "next_respondent_no": next_resp_no,
     }
 
 

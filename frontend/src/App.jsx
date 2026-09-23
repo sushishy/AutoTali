@@ -31,6 +31,8 @@ export default function App() {
     return localStorage.getItem('autotali_tab') || 'scanner';
   });
   const [isCardOpen, setIsCardOpen] = useState(false);
+  const [activeFile, setActiveFile] = useState('Tally.xlsx');
+  const [availableFiles, setAvailableFiles] = useState(['Tally.xlsx']);
 
   // Sync to localStorage
   useEffect(() => {
@@ -59,6 +61,9 @@ export default function App() {
       const data = await res.json();
       const secs = data.sections || [];
       setSections(secs);
+      if (data.active_file) setActiveFile(data.active_file);
+      if (data.available_files) setAvailableFiles(data.available_files);
+
       // If no saved respondent in localStorage, use backend next
       if (!localStorage.getItem('autotali_resp')) {
         setRespondentNo(data.next_respondent_no || 16);
@@ -73,6 +78,57 @@ export default function App() {
       }
     } catch (err) {
       console.warn('API connection check:', err);
+    }
+  };
+
+  const handleSwitchFile = async (filename) => {
+    try {
+      const res = await fetch('/api/sheets/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setActiveFile(data.active_file);
+        setAvailableFiles(data.available_files);
+        setRespondentNo(data.next_respondent_no);
+        setCurrentStepIdx(0);
+        setCollectedData({});
+        handleRetake();
+      } else {
+        alert(`Failed to switch file: ${data.detail || 'Error'}`);
+      }
+    } catch (e) {
+      alert('Network error switching file');
+    }
+  };
+
+  const handleCreateNewFile = async (rawName) => {
+    let filename = rawName.trim();
+    if (!filename) return;
+    if (!filename.endsWith('.xlsx')) filename += '.xlsx';
+
+    try {
+      const res = await fetch('/api/sheets/new', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setActiveFile(data.active_file);
+        setAvailableFiles(data.available_files);
+        setRespondentNo(data.next_respondent_no || 1);
+        setCurrentStepIdx(0);
+        setCollectedData({});
+        handleRetake();
+        alert(`Created and switched to empty questionnaire: ${filename}`);
+      } else {
+        alert(`Could not create file: ${data.detail || 'Error'}`);
+      }
+    } catch (e) {
+      alert('Network error creating file');
     }
   };
 
@@ -185,6 +241,10 @@ export default function App() {
         onTabChange={setActiveTab}
         localIp={localIp}
         onSetRespondentNo={(newNo) => setRespondentNo(newNo)}
+        activeFile={activeFile}
+        availableFiles={availableFiles}
+        onSwitchFile={handleSwitchFile}
+        onCreateNewFile={handleCreateNewFile}
       />
 
       {notice && (

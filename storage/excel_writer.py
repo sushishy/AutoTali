@@ -94,3 +94,67 @@ class ExcelWriter:
             return False, f"Permission denied! Please close {os.path.basename(self.excel_path)} in Excel."
         except Exception as e:
             return False, f"Error saving to Excel: {str(e)}"
+
+    def list_sheets(self):
+        """Lists all sheet/file targets available in excel directory."""
+        files = []
+        if os.path.exists(config.EXCEL_DIR):
+            for f in os.listdir(config.EXCEL_DIR):
+                if f.endswith('.xlsx') and not f.startswith('~$'):
+                    files.append(f)
+        if not files:
+            files.append(os.path.basename(self.excel_path))
+        return sorted(files)
+
+    def switch_file(self, filename):
+        """Switches active excel file target."""
+        if not filename.endswith('.xlsx'):
+            filename += '.xlsx'
+        new_path = os.path.join(config.EXCEL_DIR, filename)
+        if os.path.exists(new_path):
+            self.excel_path = new_path
+            return True, f"Switched to {filename}"
+        return False, f"File {filename} not found"
+
+    def create_new_template(self, filename):
+        """Creates a brand new empty Excel file with exact AutoTali questionnaire headers."""
+        if not filename.endswith('.xlsx'):
+            filename += '.xlsx'
+        target_path = os.path.join(config.EXCEL_DIR, filename)
+        if os.path.exists(target_path):
+            return False, f"File '{filename}' already exists!"
+
+        try:
+            # If default template exists, clone headers only
+            if os.path.exists(config.EXCEL_PATH):
+                src_wb = openpyxl.load_workbook(config.EXCEL_PATH)
+                src_ws = src_wb.active
+                new_wb = openpyxl.Workbook()
+                new_ws = new_wb.active
+                new_ws.title = src_ws.title
+
+                # Copy header rows (Row 1 and Row 2)
+                for r in range(1, config.DATA_START_ROW):
+                    for c in range(1, 33):
+                        new_ws.cell(row=r, column=c, value=src_ws.cell(row=r, column=c).value)
+                src_wb.close()
+            else:
+                # Build fresh headers from scratch
+                new_wb = openpyxl.Workbook()
+                new_ws = new_wb.active
+                new_ws.title = "Tally"
+                new_ws.cell(row=1, column=1, value="Respondent #")
+                new_ws.cell(row=2, column=1, value="No.")
+                col_i = 2
+                for sec in config.SECTIONS:
+                    for c_letter in sec["cols"]:
+                        new_ws.cell(row=1, column=col_i, value=sec["name"])
+                        new_ws.cell(row=2, column=col_i, value=c_letter)
+                        col_i += 1
+
+            new_wb.save(target_path)
+            new_wb.close()
+            self.excel_path = target_path
+            return True, f"Created and switched to {filename}"
+        except Exception as e:
+            return False, f"Failed to create new template: {str(e)}"
