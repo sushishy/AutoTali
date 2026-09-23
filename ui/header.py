@@ -31,7 +31,17 @@ class HeaderBar(tk.Frame):
         tk.Button(
             right_f, text="Connect", command=self._trigger_reconnect,
             bg="#2563eb", fg="white", relief=tk.FLAT, padx=10, cursor="hand2"
-        ).pack(side=tk.LEFT, padx=4)
+        ).pack(side=tk.LEFT, padx=3)
+
+        tk.Button(
+            right_f, text="⚡ USB Phone", command=self._set_usb_phone,
+            bg="#059669", fg="white", relief=tk.FLAT, padx=8, cursor="hand2"
+        ).pack(side=tk.LEFT, padx=3)
+
+    def _set_usb_phone(self):
+        self.cam_entry.delete(0, tk.END)
+        self.cam_entry.insert(0, "http://127.0.0.1:8080/video")
+        self._trigger_reconnect()
 
     def _trigger_reconnect(self):
         url = self.cam_entry.get().strip()

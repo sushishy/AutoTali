@@ -24,8 +24,17 @@ class CameraStream:
             return True
 
         source = self.src
-        if isinstance(source, str) and source.strip().isdigit():
-            source = int(source.strip())
+        if isinstance(source, str):
+            source_str = source.strip()
+            if source_str.isdigit():
+                source = int(source_str)
+            elif "localhost" in source_str or "127.0.0.1" in source_str:
+                # Ensure ADB forwards USB traffic to phone IP Webcam server
+                import subprocess
+                try:
+                    subprocess.run(["adb", "forward", "tcp:8080", "tcp:8080"], capture_output=True, timeout=3)
+                except Exception:
+                    pass
 
         try:
             self.cap = cv2.VideoCapture(source)
