@@ -27,7 +27,7 @@ export default function StepHeader({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            AutoTally
+            AutoTali
           </span>
           <span style={{ fontSize: '0.7rem', border: '1px solid var(--border-primary)', padding: '2px 6px', borderRadius: 'var(--radius-xs)', color: 'var(--text-secondary)' }}>
             Resp. #{respondentNo}

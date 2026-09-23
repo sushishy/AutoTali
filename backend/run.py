@@ -21,7 +21,7 @@ def get_local_ip():
 if __name__ == "__main__":
     local_ip = get_local_ip()
     print("------------------------------------------------------------")
-    print("  AUTOTALLY SCANNER SERVER READY")
+    print("  AUTOTALI SCANNER SERVER READY")
     print("------------------------------------------------------------")
     print(f"  PC Browser:      http://localhost:8000")
     print(f"  Phone Browser:   http://{local_ip}:8000")

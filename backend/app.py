@@ -13,7 +13,7 @@ import config
 from detector import SectionDetector
 from storage import ExcelWriter
 
-app = FastAPI(title="AutoTally Web API", version="1.0.0")
+app = FastAPI(title="AutoTali Web API", version="1.0.0")
 
 # Enable CORS for local network and localhost
 app.add_middleware(
