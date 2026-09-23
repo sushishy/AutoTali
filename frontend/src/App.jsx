@@ -131,6 +131,7 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         localIp={localIp}
+        onSetRespondentNo={(newNo) => setRespondentNo(newNo)}
       />
 
       {notice && (

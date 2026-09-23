@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Camera, FileText, Smartphone, Laptop, Check, Copy, Edit3 } from 'lucide-react';
+import { Camera, FileText, Smartphone, Laptop, Check, Copy, Edit3, Hash } from 'lucide-react';
 
 export default function StepHeader({
   respondentNo,
@@ -11,14 +11,25 @@ export default function StepHeader({
   activeTab,
   onTabChange,
   localIp,
+  onSetRespondentNo,
 }) {
   const [copied, setCopied] = useState(false);
+  const [isEditingResp, setIsEditingResp] = useState(false);
+  const [tempResp, setTempResp] = useState(respondentNo);
   const phoneUrl = `http://${localIp || 'localhost'}:8000`;
 
   const copyUrl = () => {
     navigator.clipboard?.writeText(phoneUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSaveResp = () => {
+    const num = parseInt(tempResp, 10);
+    if (!isNaN(num) && num >= 1 && onSetRespondentNo) {
+      onSetRespondentNo(num);
+    }
+    setIsEditingResp(false);
   };
 
   return (
@@ -56,7 +67,7 @@ export default function StepHeader({
         </div>
 
         {/* View Tabs */}
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           <button
             onClick={() => onTabChange('manual')}
             style={{
@@ -83,6 +94,70 @@ export default function StepHeader({
           >
             <Camera size={13} /> Scanner
           </button>
+
+          {/* Respondent Number / Row Selector Button (Right side of Scanner) */}
+          {isEditingResp ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <input
+                type="number"
+                min="1"
+                max="999"
+                value={tempResp}
+                onChange={(e) => setTempResp(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSaveResp();
+                  if (e.key === 'Escape') setIsEditingResp(false);
+                }}
+                autoFocus
+                style={{
+                  width: 55,
+                  padding: '5px 6px',
+                  fontSize: '0.75rem',
+                  background: 'var(--bg-elevated)',
+                  color: '#ffffff',
+                  border: '1px solid #ffffff',
+                  borderRadius: 'var(--radius-xs)',
+                  textAlign: 'center',
+                }}
+              />
+              <button
+                onClick={handleSaveResp}
+                title="Save respondent number"
+                style={{
+                  padding: '5px 8px',
+                  fontSize: '0.75rem',
+                  background: '#ffffff',
+                  color: '#000000',
+                  fontWeight: 700,
+                }}
+              >
+                <Check size={12} strokeWidth={3} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setTempResp(respondentNo);
+                setIsEditingResp(true);
+              }}
+              title="Click to change Respondent / Excel Row Level"
+              style={{
+                padding: '6px 10px',
+                fontSize: '0.75rem',
+                background: 'transparent',
+                color: '#ffffff',
+                borderColor: 'var(--border-primary)',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+              }}
+            >
+              <Hash size={13} color="#a3a3a3" />
+              <span>Resp #{respondentNo}</span>
+            </button>
+          )}
+
           <button
             onClick={() => onTabChange('guide')}
             style={{
