@@ -30,7 +30,7 @@ start /b powershell -NoProfile -Command "Start-Sleep -Milliseconds 2000; Start-P
 :: Check if Windows Terminal (wt.exe) is available
 where wt.exe >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
-    start wt -d "%PROJECT_DIR%" --title "AutoTali Server" cmd /k "python backend\run.py" ; new-tab -d "%PROJECT_DIR%" --title "Phone & Hotspot Info" cmd /k "powershell -NoProfile -Command \"Write-Host '==================================================' -ForegroundColor White; Write-Host '  AUTOTALI CONNECTION MONITOR' -ForegroundColor White; Write-Host '==================================================' -ForegroundColor White; $ip = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notmatch 'Loopback' -and $_.IPAddress -notlike '169.*' } | Select-Object -First 1).IPAddress; Write-Host ('  PC URL:    http://localhost:8000'); Write-Host ('  Phone URL: http://' + $ip + ':8000'); Write-Host '==================================================' -ForegroundColor White; Write-Host '  ADB USB Devices:'; adb devices; Write-Host '==================================================' -ForegroundColor White;\""
+    start wt -d "%PROJECT_DIR%" --title "AutoTali Server" cmd /k "python backend\run.py" ; new-tab -d "%PROJECT_DIR%" --title "Phone & Hotspot Info" powershell -NoProfile -ExecutionPolicy Bypass -File "%PROJECT_DIR%\tools\phone_monitor.ps1"
 ) else (
     start "AutoTali Server" cmd /k "python backend\run.py"
 )
