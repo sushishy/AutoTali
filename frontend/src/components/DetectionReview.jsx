@@ -108,13 +108,31 @@ export default function DetectionReview({ section, detectedVal, onChange, onReta
           <RotateCcw size={14} /> Retake
         </button>
 
-        <button
-          onClick={onConfirm}
-          disabled={isProcessing}
-          style={{ flex: 2, padding: 10, fontSize: '0.85rem', background: '#ffffff', color: '#000000', fontWeight: 700 }}
-        >
-          {isProcessing ? 'Saving...' : isLastStep ? <><Save size={14} /> Save to Excel</> : <>Next <ArrowRight size={14} /></>}
-        </button>
+        {(() => {
+          const isComplete = isStrand
+            ? detectedVal !== null && detectedVal !== undefined
+            : Array.isArray(detectedVal) && detectedVal.length === 5 && detectedVal.every((v) => v >= 1 && v <= 5);
+
+          return (
+            <button
+              onClick={onConfirm}
+              disabled={isProcessing || !isComplete}
+              style={{
+                flex: 2,
+                padding: 10,
+                fontSize: '0.85rem',
+                background: isComplete ? '#ffffff' : '#262626',
+                color: isComplete ? '#000000' : '#737373',
+                borderColor: isComplete ? '#ffffff' : '#262626',
+                fontWeight: 700,
+                cursor: isComplete ? 'pointer' : 'not-allowed',
+              }}
+              title={!isComplete ? 'Please complete this section before proceeding' : ''}
+            >
+              {isProcessing ? 'Saving...' : isLastStep ? <><Save size={14} /> Save to Excel</> : <>Next <ArrowRight size={14} /></>}
+            </button>
+          );
+        })()}
       </div>
     </div>
   );

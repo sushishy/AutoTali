@@ -86,24 +86,30 @@ export default function StepHeader({
         </div>
       </div>
 
-      {/* Section Pill Tabs */}
+      {/* Section Pill Tabs — Only allow jumping to current or already completed steps */}
       <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginTop: 10, paddingBottom: 2 }}>
         {sections.map((sec, idx) => {
           const isCurrent = idx === currentStep - 1;
           const isDone = idx < currentStep - 1;
+          const isAccessible = idx <= currentStep - 1;
+
           return (
             <button
               key={sec.id}
-              onClick={() => onSelectStep(idx)}
+              onClick={() => isAccessible && onSelectStep(idx)}
+              disabled={!isAccessible}
               style={{
                 padding: '4px 10px',
                 fontSize: '0.75rem',
                 background: isCurrent ? '#ffffff' : 'transparent',
-                color: isCurrent ? '#000000' : isDone ? '#ffffff' : 'var(--text-muted)',
-                borderColor: isCurrent ? '#ffffff' : isDone ? '#404040' : 'var(--border-primary)',
+                color: isCurrent ? '#000000' : isDone ? '#ffffff' : '#404040',
+                borderColor: isCurrent ? '#ffffff' : isDone ? '#404040' : '#1f1f1f',
                 fontWeight: isCurrent ? 700 : 500,
                 whiteSpace: 'nowrap',
+                opacity: isAccessible ? 1 : 0.4,
+                cursor: isAccessible ? 'pointer' : 'not-allowed',
               }}
+              title={!isAccessible ? `Please complete step ${currentStep} first` : ''}
             >
               {isDone && <Check size={11} strokeWidth={3} />}
               {idx + 1}. {sec.name.split('—')[0].replace('Part ', 'P').trim()}
