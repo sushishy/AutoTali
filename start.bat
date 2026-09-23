@@ -30,7 +30,16 @@ start /b powershell -NoProfile -Command "Start-Sleep -Milliseconds 2000; Start-P
 :: Check if Windows Terminal (wt.exe) is available
 where wt.exe >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
-    wt -d "%PROJECT_DIR%" --title "AutoTally Server" cmd /k "python backend\run.py" ; new-tab -d "%PROJECT_DIR%" --title "Phone & Hotspot Info" cmd /k "powershell -NoProfile -Command \"Write-Host '==================================================' -ForegroundColor White; Write-Host '  AUTOTALLY CONNECTION MONITOR' -ForegroundColor White; Write-Host '==================================================' -ForegroundColor White; $ip = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notmatch 'Loopback' -and $_.IPAddress -notlike '169.*' } | Select-Object -First 1).IPAddress; Write-Host ('  PC URL:    http://localhost:8000'); Write-Host ('  Phone URL: http://' + $ip + ':8000'); Write-Host '==================================================' -ForegroundColor White; Write-Host '  ADB USB Devices:'; adb devices; Write-Host '==================================================' -ForegroundColor White;\""
+    start wt -d "%PROJECT_DIR%" --title "AutoTally Server" cmd /k "python backend\run.py" ; new-tab -d "%PROJECT_DIR%" --title "Phone & Hotspot Info" cmd /k "powershell -NoProfile -Command \"Write-Host '==================================================' -ForegroundColor White; Write-Host '  AUTOTALLY CONNECTION MONITOR' -ForegroundColor White; Write-Host '==================================================' -ForegroundColor White; $ip = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notmatch 'Loopback' -and $_.IPAddress -notlike '169.*' } | Select-Object -First 1).IPAddress; Write-Host ('  PC URL:    http://localhost:8000'); Write-Host ('  Phone URL: http://' + $ip + ':8000'); Write-Host '==================================================' -ForegroundColor White; Write-Host '  ADB USB Devices:'; adb devices; Write-Host '==================================================' -ForegroundColor White;\""
 ) else (
     start "AutoTally Server" cmd /k "python backend\run.py"
 )
+
+echo.
+echo ========================================================================
+echo   [SUCCESS] AutoTally Terminal Launched!
+echo   Closing launcher in 1 second...
+echo ========================================================================
+
+powershell -NoProfile -Command "Start-Sleep -Seconds 1"
+exit
