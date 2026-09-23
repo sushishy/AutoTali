@@ -31,6 +31,7 @@ export default function App() {
     return localStorage.getItem('autotali_tab') || 'scanner';
   });
   const [isCardOpen, setIsCardOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [activeFile, setActiveFile] = useState('Tally.xlsx');
   const [availableFiles, setAvailableFiles] = useState(['Tally.xlsx']);
 
@@ -132,7 +133,40 @@ export default function App() {
     }
   };
 
+  const handleSetRespondentNo = async (newNo) => {
+    setRespondentNo(newNo);
+    setIsEditing(false);
+    // Check if this respondent already has data in Excel
+    try {
+      const res = await fetch(`/api/respondent/${newNo}`);
+      const result = await res.json();
+      if (result.exists && result.data) {
+        // Pre-fill all sections with existing answers
+        const loaded = {};
+        Object.entries(result.data).forEach(([secId, val]) => {
+          loaded[parseInt(secId, 10)] = val;
+        });
+        setCollectedData(loaded);
+        setIsEditing(true);
+        // Restore value for current step
+        const activeSec = sections[currentStepIdx];
+        if (activeSec && loaded[activeSec.id] !== undefined) {
+          setDetectedVal(loaded[activeSec.id]);
+        }
+      } else {
+        // Fresh respondent — clear everything
+        setCollectedData({});
+        setDetectedVal(null);
+        setCurrentStepIdx(0);
+        handleRetake();
+      }
+    } catch {
+      // Network error — just set the number and continue
+    }
+  };
+
   const currentSection = sections[currentStepIdx] || { id: 1, name: 'Part I — SHS Strand', type: 'strand' };
+
 
   const handleCapture = async (base64Image) => {
     setIsProcessing(true);
@@ -211,9 +245,11 @@ export default function App() {
         });
         const data = await res.json();
         if (data.success) {
-          alert(`Saved respondent #${respondentNo} to Excel!\nReady for next respondent.`);
+          const action = isEditing ? 'Updated' : 'Saved';
+          alert(`${action} respondent #${respondentNo} to Excel!\nReady for next respondent.`);
           setCurrentStepIdx(0);
           setCollectedData({});
+          setIsEditing(false);
           setRespondentNo(data.next_respondent_no);
           handleRetake();
         } else {
@@ -240,7 +276,8 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         localIp={localIp}
-        onSetRespondentNo={(newNo) => setRespondentNo(newNo)}
+        onSetRespondentNo={handleSetRespondentNo}
+        isEditing={isEditing}
         activeFile={activeFile}
         availableFiles={availableFiles}
         onSwitchFile={handleSwitchFile}

@@ -74,6 +74,17 @@ def get_status():
     }
 
 
+@app.get("/api/respondent/{respondent_no}")
+def get_respondent(respondent_no: int):
+    """Loads existing survey data for a respondent number if it exists in the active Excel file."""
+    data = excel_writer.load_respondent_data(respondent_no)
+    if data is None:
+        return {"exists": False, "data": None}
+    # Convert int keys to strings for JSON (section ids are ints)
+    return {"exists": True, "data": data}
+
+
+
 @app.post("/api/sheets/new")
 def create_new_sheet(payload: NewSheetRequest):
     """Creates a new empty formatted Excel workbook with custom name."""

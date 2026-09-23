@@ -16,6 +16,7 @@ export default function StepHeader({
   availableFiles = ['Tally.xlsx'],
   onSwitchFile,
   onCreateNewFile,
+  isEditing = false,
 }) {
   const [copied, setCopied] = useState(false);
   const [isEditingResp, setIsEditingResp] = useState(false);
@@ -114,6 +115,18 @@ export default function StepHeader({
             >
               <Hash size={11} color="#a3a3a3" />
               <span>#{respondentNo}</span>
+              {isEditing && (
+                <span style={{
+                  fontSize: '0.6rem',
+                  fontWeight: 800,
+                  background: '#d97706',
+                  color: '#000000',
+                  borderRadius: 3,
+                  padding: '1px 4px',
+                  letterSpacing: '0.04em',
+                  lineHeight: 1,
+                }}>EDIT</span>
+              )}
             </button>
           )}
         </div>
@@ -293,7 +306,7 @@ export default function StepHeader({
                 <button
                   onClick={() => {
                     setFileDropdownOpen(false);
-                    const name = window.prompt('Enter filename for new empty file:\n(e.g. Section_B)');
+                    const name = window.prompt('Enter filename for new empty file:\nExample: Section_B.xlsx');
                     if (name && name.trim() && onCreateNewFile) {
                       onCreateNewFile(name.trim());
                     }

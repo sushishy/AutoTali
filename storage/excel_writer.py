@@ -49,6 +49,62 @@ class ExcelWriter:
         wb.close()
         return target_row or config.DATA_START_ROW, target_respondent_no or 1
 
+    def _find_respondent_row(self, respondent_no):
+        """
+        Scans the sheet for a row where Column A == respondent_no.
+        Returns the row number (int) or None if not found.
+        """
+        if not os.path.exists(self.excel_path):
+            return None
+        try:
+            wb = openpyxl.load_workbook(self.excel_path, data_only=True)
+            ws = wb.active
+            for row in range(config.DATA_START_ROW, ws.max_row + 1):
+                val_a = ws.cell(row=row, column=1).value
+                try:
+                    if int(val_a) == int(respondent_no):
+                        wb.close()
+                        return row
+                except (TypeError, ValueError):
+                    continue
+            wb.close()
+            return None
+        except Exception:
+            return None
+
+    def load_respondent_data(self, respondent_no):
+        """
+        Loads existing survey answers for a respondent number.
+        Returns dict {section_id: value} or None if respondent not found.
+        strand sections return a single int; grid sections return a list of ints.
+        """
+        target_row = self._find_respondent_row(respondent_no)
+        if target_row is None:
+            return None
+
+        try:
+            wb = openpyxl.load_workbook(self.excel_path, data_only=True)
+            ws = wb.active
+            result = {}
+            for sec in config.SECTIONS:
+                sec_id = sec["id"]
+                cols = sec["cols"]
+                if sec["type"] == "strand":
+                    col_idx = column_index_from_string(cols[0])
+                    raw = ws.cell(row=target_row, column=col_idx).value
+                    result[sec_id] = int(raw) if raw is not None else None
+                elif sec["type"] == "grid":
+                    vals = []
+                    for col_letter in cols:
+                        col_idx = column_index_from_string(col_letter)
+                        v = ws.cell(row=target_row, column=col_idx).value
+                        vals.append(int(v) if v is not None else None)
+                    result[sec_id] = vals
+            wb.close()
+            return result
+        except Exception:
+            return None
+
     def append_respondent_data(self, respondent_no, survey_data):
         """
         Writes a full row for one respondent into Tally.xlsx.
@@ -62,7 +118,12 @@ class ExcelWriter:
             wb = openpyxl.load_workbook(self.excel_path)
             ws = wb.active
 
-            target_row, _ = self.get_next_respondent_info()
+            # Upsert: update existing row if respondent already has data, else append
+            existing_row = self._find_respondent_row(respondent_no)
+            if existing_row:
+                target_row = existing_row
+            else:
+                target_row, _ = self.get_next_respondent_info()
 
             # Safety guard: never overwrite header rows or rows before row 3
             if target_row < config.DATA_START_ROW:
