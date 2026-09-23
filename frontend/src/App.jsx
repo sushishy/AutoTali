@@ -105,7 +105,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw' }}>
+    <div className="app-container">
       <StepHeader
         respondentNo={respondentNo}
         currentStep={currentStepIdx + 1}
@@ -128,8 +128,8 @@ export default function App() {
       )}
 
       {activeTab === 'scanner' ? (
-        <main style={{ flex: 1, display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) 320px', gap: 12, padding: 12, overflow: 'hidden' }}>
-          <div style={{ height: '100%', minHeight: 300 }}>
+        <main className="scanner-grid">
+          <div className="camera-container-box" style={{ height: '100%', minHeight: 280 }}>
             <CameraScanner
               onCapture={handleCapture}
               frozenImage={frozenOverlay}
@@ -137,7 +137,7 @@ export default function App() {
             />
           </div>
 
-          <div style={{ height: '100%' }}>
+          <div className="review-container-box" style={{ height: '100%' }}>
             <DetectionReview
               section={currentSection}
               detectedVal={detectedVal}

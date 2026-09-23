@@ -72,3 +72,44 @@ button:disabled {
   background: var(--border-primary);
   border-radius: 3px;
 }
+
+/* Responsive Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  width: 100vw;
+  overflow: hidden;
+}
+
+.scanner-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) 340px;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .scanner-grid {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 8px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .camera-container-box {
+    height: 48vh !important;
+    min-height: 260px !important;
+    max-height: 380px !important;
+  }
+
+  .review-container-box {
+    flex: 1 !important;
+    min-height: 280px !important;
+  }
+}
