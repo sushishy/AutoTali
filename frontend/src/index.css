@@ -145,4 +145,26 @@ button:disabled {
     transform: translateY(105%);
     pointer-events: none;
   }
+
+  /* Compact header on small screens */
+  .phone-url-text {
+    display: none !important;
+  }
+
+  .active-file-label {
+    max-width: 60px !important;
+  }
+
+  /* Manual mode card adjustments on mobile */
+  .manual-entry-card {
+    padding: 14px !important;
+    gap: 12px !important;
+    border-radius: var(--radius-sm) !important;
+  }
+
+  .likert-scale-btn {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+  }
 }

@@ -59,11 +59,12 @@ export default function StepHeader({
   const CurrentModeIcon = modeLabels[activeTab]?.icon || Camera;
 
   return (
-    <header style={{ padding: '10px 16px', borderBottom: '1px solid var(--border-primary)', background: 'var(--bg-secondary)', position: 'relative', zIndex: 100 }}>
-      {/* Top row: Brand & IP display banner */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+    <header style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-primary)', background: 'var(--bg-secondary)', position: 'relative', zIndex: 100 }}>
+      {/* Top row: Brand, Resp selector, and Dropdown Controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+        {/* Left: Brand + Respondent quick tag */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+          <span style={{ fontSize: '0.9rem', fontWeight: 900, letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
             AutoTali
           </span>
 
@@ -82,8 +83,8 @@ export default function StepHeader({
                 }}
                 autoFocus
                 style={{
-                  width: 50,
-                  padding: '3px 4px',
+                  width: 44,
+                  padding: '2px 4px',
                   fontSize: '0.72rem',
                   background: 'var(--bg-elevated)',
                   color: '#ffffff',
@@ -94,7 +95,7 @@ export default function StepHeader({
               />
               <button
                 onClick={handleSaveResp}
-                style={{ padding: '3px 6px', fontSize: '0.72rem', background: '#ffffff', color: '#000000', fontWeight: 700 }}
+                style={{ padding: '2px 5px', fontSize: '0.7rem', background: '#ffffff', color: '#000000', fontWeight: 700 }}
               >
                 <Check size={11} strokeWidth={3} />
               </button>
@@ -107,35 +108,37 @@ export default function StepHeader({
               }}
               title="Click to change Respondent / Excel Row Level"
               style={{
-                padding: '3px 8px',
-                fontSize: '0.72rem',
+                padding: '3px 6px',
+                fontSize: '0.7rem',
                 background: 'var(--bg-elevated)',
-                color: 'var(--text-secondary)',
+                color: '#ffffff',
                 border: '1px solid var(--border-primary)',
                 borderRadius: 'var(--radius-xs)',
                 fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 4,
+                gap: 3,
+                whiteSpace: 'nowrap',
               }}
             >
-              <Hash size={12} color="#a3a3a3" />
-              <span>Resp #{respondentNo}</span>
+              <Hash size={11} color="#a3a3a3" />
+              <span>#{respondentNo}</span>
             </button>
           )}
         </div>
 
-        {/* Action Controls: Mode Dropdown, Excel File Dropdown, and Phone URL */}
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-          {/* Phone IP URL Badge */}
+        {/* Right: Dropdowns & Connect actions */}
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          {/* Phone IP URL Badge (Compact icon on mobile) */}
           <div
             onClick={copyUrl}
-            title="Click to copy phone URL"
+            title={`Phone URL: ${phoneUrl} (Click to copy)`}
+            className="phone-url-badge"
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
-              padding: '5px 10px',
+              gap: 4,
+              padding: '4px 8px',
               background: 'var(--bg-elevated)',
               border: '1px solid var(--border-primary)',
               borderRadius: 'var(--radius-sm)',
@@ -143,8 +146,8 @@ export default function StepHeader({
             }}
           >
             <Smartphone size={13} color="#a3a3a3" />
-            <code style={{ fontSize: '0.75rem', color: '#ffffff', fontWeight: 700 }}>{phoneUrl}</code>
-            {copied ? <Check size={12} color="#ffffff" /> : <Copy size={12} color="#a3a3a3" />}
+            <code className="phone-url-text" style={{ fontSize: '0.72rem', color: '#ffffff', fontWeight: 600 }}>{phoneUrl}</code>
+            {copied ? <Check size={11} color="#ffffff" /> : <Copy size={11} color="#a3a3a3" />}
           </div>
 
           {/* Mode Dropdown Menu */}
@@ -155,33 +158,34 @@ export default function StepHeader({
                 setFileDropdownOpen(false);
               }}
               style={{
-                padding: '6px 10px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
+                padding: '5px 8px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6,
+                gap: 4,
                 background: '#ffffff',
                 color: '#000000',
                 border: '1px solid #ffffff',
+                whiteSpace: 'nowrap',
               }}
             >
-              <CurrentModeIcon size={13} />
+              <CurrentModeIcon size={12} />
               <span>{modeLabels[activeTab]?.label || 'Mode'}</span>
-              <ChevronDown size={12} />
+              <ChevronDown size={11} />
             </button>
 
             {modeDropdownOpen && (
               <div
                 style={{
                   position: 'absolute',
-                  top: '110%',
+                  top: '115%',
                   right: 0,
-                  width: 130,
+                  width: 125,
                   background: 'var(--bg-elevated)',
                   border: '1px solid var(--border-primary)',
                   borderRadius: 'var(--radius-sm)',
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.8)',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.85)',
                   display: 'flex',
                   flexDirection: 'column',
                   overflow: 'hidden',
@@ -200,7 +204,7 @@ export default function StepHeader({
                       setModeDropdownOpen(false);
                     }}
                     style={{
-                      padding: '8px 12px',
+                      padding: '8px 10px',
                       fontSize: '0.75rem',
                       background: activeTab === id ? '#262626' : 'transparent',
                       color: activeTab === id ? '#ffffff' : 'var(--text-secondary)',
@@ -226,22 +230,23 @@ export default function StepHeader({
                 setModeDropdownOpen(false);
               }}
               style={{
-                padding: '6px 10px',
-                fontSize: '0.75rem',
+                padding: '5px 8px',
+                fontSize: '0.72rem',
                 fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6,
-                background: 'transparent',
+                gap: 4,
+                background: 'var(--bg-elevated)',
                 color: '#ffffff',
                 borderColor: 'var(--border-primary)',
+                whiteSpace: 'nowrap',
               }}
             >
-              <FileSpreadsheet size={13} color="#a3a3a3" />
-              <span style={{ maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <FileSpreadsheet size={12} color="#a3a3a3" />
+              <span className="active-file-label" style={{ maxWidth: 75, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {activeFile}
               </span>
-              <ChevronDown size={12} />
+              <ChevronDown size={11} />
             </button>
 
             {fileDropdownOpen && (

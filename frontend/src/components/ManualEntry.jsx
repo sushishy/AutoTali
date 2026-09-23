@@ -31,8 +31,9 @@ export default function ManualEntry({
     : values.length === 5 && values.every((v) => v !== null && v !== undefined && v >= 1 && v <= 5);
 
   return (
-    <div style={{ flex: 1, padding: 16, overflowY: 'auto' }}>
+    <div style={{ flex: 1, padding: '12px', overflowY: 'auto' }}>
       <div
+        className="manual-entry-card"
         style={{
           maxWidth: 680,
           margin: '0 auto',
@@ -150,6 +151,7 @@ export default function ManualEntry({
                       <button
                         key={scaleVal}
                         type="button"
+                        className="likert-scale-btn"
                         onClick={() => handleSelectLikert(qIdx, scaleVal)}
                         style={{
                           width: 38,
