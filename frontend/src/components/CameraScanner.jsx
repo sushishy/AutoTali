@@ -1,10 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { ZoomIn, ZoomOut, RotateCcw, Camera, AlertCircle } from 'lucide-react';
 
 export default function CameraScanner({ onCapture, frozenImage, isProcessing }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
-  const [hasCamera, setHasCamera] = useState(true);
   const [cameraError, setCameraError] = useState(null);
 
   useEffect(() => {
@@ -15,7 +15,6 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
   const startCamera = async () => {
     try {
       stopCamera();
-      // Request rear camera with high resolution
       const constraints = {
         video: {
           facingMode: { ideal: 'environment' },
@@ -29,21 +28,17 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-      setHasCamera(true);
       setCameraError(null);
     } catch (err) {
-      console.warn('Environment camera failed, trying default camera:', err);
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
-        setHasCamera(true);
         setCameraError(null);
       } catch (fallbackErr) {
-        setHasCamera(false);
-        setCameraError('Camera access denied or unavailable. Please grant camera permission.');
+        setCameraError('Camera access denied or unavailable.');
       }
     }
   };
@@ -63,7 +58,6 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
     canvas.height = video.videoHeight || 720;
     const ctx = canvas.getContext('2d');
 
-    // Apply digital zoom crop
     if (zoomLevel > 1.0) {
       const cropW = canvas.width / zoomLevel;
       const cropH = canvas.height / zoomLevel;
@@ -74,100 +68,69 @@ export default function CameraScanner({ onCapture, frozenImage, isProcessing }) 
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     }
 
-    const base64Data = canvas.toDataURL('image/jpeg', 0.9);
-    onCapture(base64Data);
+    onCapture(canvas.toDataURL('image/jpeg', 0.9));
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', background: '#000', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', background: '#0a0a0a', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {frozenImage ? (
-        <img
-          src={frozenImage}
-          alt="Frozen Capture"
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-        />
+        <img src={frozenImage} alt="Capture" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
       ) : (
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            transform: `scale(${zoomLevel})`,
-            transition: 'transform 0.15s ease-out',
-          }}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', transform: `scale(${zoomLevel})`, transition: 'transform 0.1s ease-out' }}
         />
       )}
 
-      {/* Camera guide boundary box */}
+      {/* Viewfinder Target */}
       {!frozenImage && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '15%',
-            left: '10%',
-            right: '10%',
-            bottom: '15%',
-            border: '2px dashed rgba(56, 189, 248, 0.6)',
-            borderRadius: 8,
-            pointerEvents: 'none',
-            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.3)',
-          }}
-        >
-          <div style={{ position: 'absolute', top: 8, left: 10, fontSize: '0.75rem', color: '#38bdf8', fontWeight: 600 }}>
-            Align Questionnaire Here
-          </div>
-        </div>
+        <div style={{ position: 'absolute', top: '15%', left: '10%', right: '10%', bottom: '15%', border: '1px dashed #ffffff', opacity: 0.5, borderRadius: 4, pointerEvents: 'none' }} />
       )}
 
-      {/* Floating Zoom Controls */}
-      <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 6, background: 'rgba(15, 23, 42, 0.75)', padding: '4px 8px', borderRadius: 9999, backdropFilter: 'blur(8px)' }}>
-        <button
-          onClick={() => setZoomLevel((z) => Math.max(1.0, +(z - 0.2).toFixed(1)))}
-          style={{ background: 'transparent', color: '#fff', fontSize: '0.9rem', padding: '2px 6px' }}
-        >
-          ➖
+      {/* Minimalist Zoom Controls */}
+      <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 4, background: 'rgba(0,0,0,0.8)', padding: 4, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-primary)' }}>
+        <button onClick={() => setZoomLevel((z) => Math.max(1.0, +(z - 0.2).toFixed(1)))} style={{ padding: '4px 6px', background: 'transparent', border: 'none' }}>
+          <ZoomOut size={14} />
         </button>
-        <span style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 700, alignSelf: 'center', minWidth: 32, textAlign: 'center' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, alignSelf: 'center', minWidth: 28, textAlign: 'center' }}>
           {zoomLevel}x
         </span>
-        <button
-          onClick={() => setZoomLevel((z) => Math.min(3.0, +(z + 0.2).toFixed(1)))}
-          style={{ background: 'transparent', color: '#fff', fontSize: '0.9rem', padding: '2px 6px' }}
-        >
-          ➕
+        <button onClick={() => setZoomLevel((z) => Math.min(3.0, +(z + 0.2).toFixed(1)))} style={{ padding: '4px 6px', background: 'transparent', border: 'none' }}>
+          <ZoomIn size={14} />
+        </button>
+        <button onClick={() => setZoomLevel(1.0)} style={{ padding: '4px 6px', background: 'transparent', border: 'none' }} title="Reset Zoom">
+          <RotateCcw size={13} />
         </button>
       </div>
 
       {cameraError && (
-        <div style={{ position: 'absolute', background: 'rgba(244,63,94,0.9)', color: '#fff', padding: 12, borderRadius: 8, margin: 16, textAlign: 'center', fontSize: '0.85rem' }}>
-          {cameraError}
+        <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', gap: 6, background: '#171717', border: '1px solid #404040', color: '#fff', padding: '10px 14px', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem' }}>
+          <AlertCircle size={15} /> {cameraError}
         </div>
       )}
 
-      {/* Floating Capture Shutter Button */}
+      {/* Minimalist Shutter Button */}
       {!frozenImage && (
-        <div style={{ position: 'absolute', bottom: 16, zIndex: 10 }}>
+        <div style={{ position: 'absolute', bottom: 18, zIndex: 10 }}>
           <button
             onClick={captureFrame}
             disabled={isProcessing}
             style={{
-              width: 68,
-              height: 68,
+              width: 58,
+              height: 58,
               borderRadius: '50%',
-              background: '#fff',
-              border: '4px solid #38bdf8',
-              boxShadow: '0 0 20px rgba(56, 189, 248, 0.5)',
+              background: '#000000',
+              border: '2px solid #ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
             }}
           >
-            <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#38bdf8' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#ffffff' }} />
           </button>
         </div>
       )}

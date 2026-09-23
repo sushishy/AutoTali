@@ -38,15 +38,29 @@ class SaveRequest(BaseModel):
     data: Dict[int, Any]  # {1: 2, 2: [5,4,3,2,1], ...}
 
 
+def get_local_ip():
+    import socket
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
+
 @app.get("/api/status")
 def get_status():
-    """Returns current scanning status, next respondent info, and section schemas."""
+    """Returns current scanning status, next respondent info, IP addresses, and section schemas."""
     next_row, next_resp_no = excel_writer.get_next_respondent_info()
     return {
         "next_row": next_row,
         "next_respondent_no": next_resp_no,
         "excel_path": excel_writer.excel_path,
         "sections": config.SECTIONS,
+        "local_ip": get_local_ip(),
+        "port": 8000,
     }
 
 

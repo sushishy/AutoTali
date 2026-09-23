@@ -7,11 +7,13 @@ export default function App() {
   const [sections, setSections] = useState([]);
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [respondentNo, setRespondentNo] = useState(16);
+  const [localIp, setLocalIp] = useState('');
   const [collectedData, setCollectedData] = useState({});
   const [frozenOverlay, setFrozenOverlay] = useState(null);
   const [detectedVal, setDetectedVal] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [notice, setNotice] = useState(null);
+  const [activeTab, setActiveTab] = useState('scanner');
 
   useEffect(() => {
     fetchStatus();
@@ -23,6 +25,7 @@ export default function App() {
       const data = await res.json();
       setSections(data.sections || []);
       setRespondentNo(data.next_respondent_no || 16);
+      setLocalIp(data.local_ip || '');
     } catch (err) {
       console.warn('API connection check:', err);
     }
@@ -64,16 +67,13 @@ export default function App() {
   };
 
   const handleConfirmNext = async () => {
-    // Record current section's confirmed answer
     const updatedCollected = { ...collectedData, [currentSection.id]: detectedVal };
     setCollectedData(updatedCollected);
 
     if (currentStepIdx < sections.length - 1) {
-      // Advance to next section
       setCurrentStepIdx((idx) => idx + 1);
       handleRetake();
     } else {
-      // All 7 sections completed! Send to Excel
       setIsProcessing(true);
       setNotice('Saving row to Tally.xlsx...');
       try {
@@ -88,7 +88,6 @@ export default function App() {
         const data = await res.json();
         if (data.success) {
           alert(`Saved respondent #${respondentNo} to Excel!\nReady for next respondent.`);
-          // Reset for next respondent
           setCurrentStepIdx(0);
           setCollectedData({});
           setRespondentNo(data.next_respondent_no);
@@ -105,8 +104,6 @@ export default function App() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState('scanner');
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw' }}>
       <StepHeader
@@ -121,17 +118,17 @@ export default function App() {
         }}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        localIp={localIp}
       />
 
       {notice && (
-        <div style={{ background: 'var(--accent-primary)', color: '#0f172a', padding: '6px 16px', textAlign: 'center', fontWeight: 600, fontSize: '0.85rem' }}>
+        <div style={{ background: '#1c1c1c', borderBottom: '1px solid var(--border-primary)', color: '#ffffff', padding: '6px 16px', textAlign: 'center', fontSize: '0.8rem' }}>
           {notice}
         </div>
       )}
 
       {activeTab === 'scanner' ? (
-        /* Main Scanner View */
-        <main style={{ flex: 1, display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) 340px', gap: 16, padding: 16, overflow: 'hidden' }}>
+        <main style={{ flex: 1, display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) 320px', gap: 12, padding: 12, overflow: 'hidden' }}>
           <div style={{ height: '100%', minHeight: 300 }}>
             <CameraScanner
               onCapture={handleCapture}
@@ -153,13 +150,12 @@ export default function App() {
           </div>
         </main>
       ) : (
-        /* Guide & Summary Tab */
-        <main style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
-          <div style={{ maxWidth: 800, margin: '0 auto', background: 'var(--bg-card)', padding: 24, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-            <h2 style={{ fontSize: '1.2rem', color: 'var(--accent-primary)', marginBottom: 16 }}>
-              Respondent #{respondentNo} — Scanned Answers Summary
+        <main style={{ flex: 1, padding: 20, overflowY: 'auto' }}>
+          <div style={{ maxWidth: 760, margin: '0 auto', background: 'var(--bg-secondary)', padding: 20, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-primary)' }}>
+            <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 16 }}>
+              Respondent #{respondentNo} — Summary
             </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {sections.map((sec, idx) => {
                 const answer = collectedData[sec.id];
                 const isCurrent = idx === currentStepIdx;
@@ -175,23 +171,23 @@ export default function App() {
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
-                      padding: '12px 16px',
+                      padding: '10px 14px',
                       borderRadius: 'var(--radius-sm)',
-                      background: isCurrent ? 'rgba(56, 189, 248, 0.12)' : 'var(--bg-main)',
-                      border: `1px solid ${isCurrent ? 'var(--accent-primary)' : 'var(--border-color)'}`,
+                      background: isCurrent ? 'var(--bg-elevated)' : 'transparent',
+                      border: `1px solid ${isCurrent ? '#ffffff' : 'var(--border-primary)'}`,
                       cursor: 'pointer',
                     }}
                   >
                     <div>
-                      <span style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>
+                      <span style={{ fontWeight: 600, color: '#fff', fontSize: '0.85rem' }}>
                         {idx + 1}. {sec.name}
                       </span>
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                        Columns: {sec.cols.join(', ')}
+                        Cols: {sec.cols.join(', ')}
                       </p>
                     </div>
-                    <span style={{ fontWeight: 700, color: answer ? 'var(--accent-emerald)' : 'var(--text-muted)', fontSize: '0.9rem' }}>
-                      {answer ? (Array.isArray(answer) ? `[ ${answer.join(', ')} ]` : `Choice ${answer}`) : 'Pending ⏳'}
+                    <span style={{ fontWeight: 600, color: answer ? '#ffffff' : 'var(--text-muted)', fontSize: '0.85rem' }}>
+                      {answer ? (Array.isArray(answer) ? `[ ${answer.join(', ')} ]` : `Choice ${answer}`) : 'Pending'}
                     </span>
                   </div>
                 );
