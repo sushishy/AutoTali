@@ -31,7 +31,6 @@ export default function App() {
     return localStorage.getItem('autotali_tab') || 'scanner';
   });
   const [isCardOpen, setIsCardOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [activeFile, setActiveFile] = useState('Tally.xlsx');
   const [availableFiles, setAvailableFiles] = useState(['Tally.xlsx']);
 
@@ -133,36 +132,8 @@ export default function App() {
     }
   };
 
-  const handleSetRespondentNo = async (newNo) => {
+  const handleSetRespondentNo = (newNo) => {
     setRespondentNo(newNo);
-    setIsEditing(false);
-    // Check if this respondent already has data in Excel
-    try {
-      const res = await fetch(`/api/respondent/${newNo}`);
-      const result = await res.json();
-      if (result.exists && result.data) {
-        // Pre-fill all sections with existing answers
-        const loaded = {};
-        Object.entries(result.data).forEach(([secId, val]) => {
-          loaded[parseInt(secId, 10)] = val;
-        });
-        setCollectedData(loaded);
-        setIsEditing(true);
-        // Restore value for current step
-        const activeSec = sections[currentStepIdx];
-        if (activeSec && loaded[activeSec.id] !== undefined) {
-          setDetectedVal(loaded[activeSec.id]);
-        }
-      } else {
-        // Fresh respondent — clear everything
-        setCollectedData({});
-        setDetectedVal(null);
-        setCurrentStepIdx(0);
-        handleRetake();
-      }
-    } catch {
-      // Network error — just set the number and continue
-    }
   };
 
   const currentSection = sections[currentStepIdx] || { id: 1, name: 'Part I — SHS Strand', type: 'strand' };
@@ -245,11 +216,9 @@ export default function App() {
         });
         const data = await res.json();
         if (data.success) {
-          const action = isEditing ? 'Updated' : 'Saved';
-          alert(`${action} respondent #${respondentNo} to Excel!\nReady for next respondent.`);
+          alert(`Saved respondent #${respondentNo} to Excel!\nReady for next respondent.`);
           setCurrentStepIdx(0);
           setCollectedData({});
-          setIsEditing(false);
           setRespondentNo(data.next_respondent_no);
           handleRetake();
         } else {
@@ -277,7 +246,6 @@ export default function App() {
         onTabChange={setActiveTab}
         localIp={localIp}
         onSetRespondentNo={handleSetRespondentNo}
-        isEditing={isEditing}
         activeFile={activeFile}
         availableFiles={availableFiles}
         onSwitchFile={handleSwitchFile}
@@ -287,6 +255,54 @@ export default function App() {
       {notice && (
         <div style={{ background: '#1c1c1c', borderBottom: '1px solid var(--border-primary)', color: '#ffffff', padding: '6px 16px', textAlign: 'center', fontSize: '0.8rem' }}>
           {notice}
+        </div>
+      )}
+
+      {/* Section Name Strip — shows above camera/content area */}
+      {activeTab !== 'guide' && (
+        <div style={{
+          padding: '6px 16px',
+          borderBottom: '1px solid var(--border-primary)',
+          background: 'var(--bg-secondary)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 8,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: 'var(--text-muted)',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
+            }}>
+              Step {currentStepIdx + 1} / {sections.length || 7}
+            </span>
+            <span style={{ width: 1, height: 12, background: 'var(--border-primary)', flexShrink: 0 }} />
+            <span style={{
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: '#ffffff',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>
+              {currentSection.name}
+            </span>
+          </div>
+          {/* Back / forward quick nav */}
+          <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+            {currentStepIdx > 0 && (
+              <button
+                onClick={() => goToStep(currentStepIdx - 1)}
+                style={{ padding: '2px 8px', fontSize: '0.7rem', background: 'transparent', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
+              >
+                ← Back
+              </button>
+            )}
+          </div>
         </div>
       )}
 

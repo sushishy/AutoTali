@@ -1,6 +1,55 @@
-# AutoTally — Questionnaire OMR Scanner
+# AutoTali — Survey Tally Scanner
 
-AutoTally is a desktop application built with Python, OpenCV, and Tkinter that scans paper survey questionnaires section by section using a phone camera stream (via IP Webcam over local WiFi). Detected marks are highlighted with real-time green/gray overlay boxes, reviewed/edited by the user, and appended directly to `Tally.xlsx`.
+**AutoTali** is a fully offline, LAN-based web app for tallying paper survey questionnaires. Run it on your laptop, connect your phone to the same WiFi or hotspot, and scan or manually enter answers — all saved directly to Excel. No internet required.
+
+---
+
+## Features
+
+- 📷 **Camera Scanner** — Point your phone camera at a questionnaire section and AutoTali automatically detects checked boxes using OpenCV. Results pop up as a review card you can swipe away or confirm.
+- ✍️ **Manual Mode** — Tap answers directly on screen. Works on any device including iPhone.
+- 📊 **Summary Mode** — See all collected answers for the current respondent at a glance before saving.
+- 💾 **Smart Save (Upsert)** — Saves to Excel without creating duplicate rows. If a respondent number already exists, it updates that row in-place.
+- ✏️ **Edit Existing Respondents** — Tap the respondent `#` in the header and change the number. If that respondent already has data in Excel, their answers are automatically loaded back into the app for editing (shown with an **EDIT** badge).
+- 📱 **Mobile-First UI** — Full-screen camera on phones, swipe-down gesture to dismiss the result card, responsive header with compact dropdowns.
+- 🗂️ **Multi-File Support** — Switch between multiple Excel files or create a new empty questionnaire file from the dropdown — no need to touch the filesystem manually.
+- 🔢 **Step Protection** — You can't skip ahead to a section you haven't reached yet. Steps are remembered across page reloads.
+- 🌐 **Single Server, Single Port** — One `start.bat` launches everything (FastAPI backend + React frontend) on port `8000`. Access it from any device on the same network.
+- 🔦 **Torch & Zoom** — Flash and zoom controls built into the camera view for better scanning in low light.
+- 📋 **Back Navigation** — Go back to a previous section to fix a mistake without losing other answers.
+
+---
+
+## Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | Python + FastAPI |
+| Frontend | React + Vite |
+| Detection | OpenCV (CLAHE preprocessing, checkbox grid detection) |
+| Excel | openpyxl |
+| Startup | Windows batch script (`start.bat`) |
+
+---
+
+## How to Run
+
+1. Double-click **`start.bat`** (run as Administrator if prompted).
+2. A browser tab opens automatically at `http://localhost:8000`.
+3. On your **phone**, connect to the same WiFi or laptop hotspot, then open the URL shown in the header (e.g. `http://10.0.1.168:8000`).
+4. Select a mode — **Scanner** to use the camera, **Manual** to tap answers directly.
+5. Go section by section. Confirm each answer, then hit **Next**.
+6. At the last section, tap **Save to Excel** — the row is written to `Tally.xlsx`.
+
+---
+
+## Questionnaire Format
+
+All sections are defined in [`config/settings.py`](config/settings.py). Edit that file to:
+- Add, remove, or rename sections
+- Change the number of questions per section
+- Map sections to different Excel columns
+- Change the default Excel filename or directory
 
 ---
 
@@ -8,36 +57,35 @@ AutoTally is a desktop application built with Python, OpenCV, and Tkinter that s
 
 ```
 AutoTali/
+├── backend/
+│   └── app.py              # FastAPI server — all API endpoints
 ├── config/
-│   ├── __init__.py
-│   └── settings.py          # Camera URL, file paths, and section column definitions
-├── camera/
-│   ├── __init__.py
-│   └── stream.py            # Non-blocking threaded video capture & reconnection
+│   └── settings.py         # Section definitions, Excel path, data layout
 ├── detector/
-│   ├── __init__.py
-│   ├── preprocessor.py      # Adaptive thresholding and ink density ROI calculation
-│   ├── strand_detector.py   # Part I SHS Strand (3 vertical choices) detection
-│   └── grid_detector.py     # Grid sections A-C (5x5 matrix, scale 1-5) detection
+│   ├── preprocessor.py     # Image preprocessing (CLAHE, thresholding)
+│   ├── strand_detector.py  # Single-choice strand section detection
+│   └── grid_detector.py    # 5x5 Likert grid detection
 ├── storage/
-│   ├── __init__.py
-│   └── excel_writer.py      # Safe row finding & atomic writing into Tally.xlsx
-├── ui/
-│   ├── __init__.py
-│   ├── theme.py             # Dark modern UI color tokens and ttk styles
-│   ├── header.py            # Header bar with live camera reconnect & progress counter
-│   ├── side_panel.py        # Detection review with radio buttons / comboboxes
-│   └── app.py               # Main window coordinator
-├── main.py                  # Application entry point
-├── requirements.txt         # Required Python packages
-└── plan.md                  # Specification document
+│   └── excel_writer.py     # Excel read, write, upsert, and template creation
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx                        # Root state and logic
+│   │   ├── index.css                      # Global styles and responsive layout
+│   │   └── components/
+│   │       ├── StepHeader.jsx             # Header bar with dropdowns and step pills
+│   │       ├── CameraScanner.jsx          # Live camera, capture, torch, zoom
+│   │       ├── DetectionReview.jsx        # Result card with swipe-down gesture
+│   │       └── ManualEntry.jsx            # Manual data entry form
+│   └── dist/                              # Built frontend served by FastAPI
+├── excel/
+│   └── Tally.xlsx                         # Default output file
+├── requirements.txt
+└── start.bat               # One-click launcher (runs backend + builds/serves frontend)
 ```
 
 ---
 
 ## Requirements
-
-Install the dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -45,14 +93,8 @@ pip install -r requirements.txt
 
 ---
 
-## How to Run
+## Notes
 
-1. Open **IP Webcam** on your Android phone and tap **Start server**.
-2. Run the application:
-   ```bash
-   python main.py
-   ```
-3. Enter your phone's IP Webcam video stream URL in the header bar (e.g. `http://192.168.1.X:8080/video`) and click **Connect**.
-4. Align the questionnaire section with the guides.
-5. Click **Capture Frame**, verify or adjust detected values on the right review panel, and click **Next Section**.
-6. When all 7 sections are scanned, click **Save to Excel** to record the row into `Tally.xlsx`.
+- **Android phones**: All features work including the live camera scanner.
+- **iPhones**: Use Manual mode. The live camera viewfinder requires HTTPS which isn't set up for local use.
+- **Excel file must be closed** in Microsoft Excel before saving, otherwise you'll get a permission error.
