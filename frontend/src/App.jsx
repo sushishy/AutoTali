@@ -30,6 +30,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('autotali_tab') || 'scanner';
   });
+  const [isCardOpen, setIsCardOpen] = useState(false);
 
   // Sync to localStorage
   useEffect(() => {
@@ -93,6 +94,7 @@ export default function App() {
       if (data.success) {
         setFrozenOverlay(data.overlay_base64);
         setDetectedVal(data.detected_value);
+        setIsCardOpen(true);
         setNotice(null);
       } else {
         setNotice('Detection failed. Please retry.');
@@ -110,6 +112,7 @@ export default function App() {
     const existing = targetSection ? collectedData[targetSection.id] : null;
     setDetectedVal(existing !== undefined ? existing : null);
     setFrozenOverlay(null);
+    setIsCardOpen(false);
     setNotice(null);
   };
 
@@ -122,6 +125,7 @@ export default function App() {
   const handleRetake = () => {
     setFrozenOverlay(null);
     setDetectedVal(null);
+    setIsCardOpen(false);
     setNotice(null);
   };
 
@@ -214,7 +218,7 @@ export default function App() {
             />
           </div>
 
-          <div className={`review-container-box ${frozenOverlay || detectedVal ? '' : 'hidden-mobile'}`}>
+          <div className={`review-container-box ${isCardOpen ? '' : 'hidden-mobile'}`}>
             <DetectionReview
               section={currentSection}
               detectedVal={detectedVal}
@@ -222,11 +226,35 @@ export default function App() {
               onRetake={handleRetake}
               onConfirm={handleConfirmNext}
               onPrevious={handlePreviousStep}
+              onDismiss={() => setIsCardOpen(false)}
               canGoBack={currentStepIdx > 0}
               isLastStep={currentStepIdx === sections.length - 1}
               isProcessing={isProcessing}
             />
           </div>
+
+          {/* Floating Pill to Reopen Card on Phone if dismissed */}
+          {!isCardOpen && (frozenOverlay || detectedVal) && (
+            <button
+              onClick={() => setIsCardOpen(true)}
+              style={{
+                position: 'absolute',
+                bottom: 16,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 40,
+                padding: '8px 16px',
+                fontSize: '0.8rem',
+                background: '#ffffff',
+                color: '#000000',
+                borderRadius: 20,
+                fontWeight: 700,
+                boxShadow: '0 4px 14px rgba(0,0,0,0.6)',
+              }}
+            >
+              View Answers &rarr;
+            </button>
+          )}
         </main>
       ) : (
         <main style={{ flex: 1, padding: 20, overflowY: 'auto' }}>

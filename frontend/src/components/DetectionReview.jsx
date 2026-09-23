@@ -1,5 +1,5 @@
-import React from 'react';
-import { RotateCcw, ArrowRight, Save, Check, ChevronLeft } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { RotateCcw, ArrowRight, Save, Check, ChevronLeft, ChevronDown, X } from 'lucide-react';
 
 export default function DetectionReview({
   section,
@@ -8,30 +8,96 @@ export default function DetectionReview({
   onRetake,
   onConfirm,
   onPrevious,
+  onDismiss,
   canGoBack,
   isLastStep,
   isProcessing,
 }) {
   const isStrand = section.type === 'strand';
+  const touchStartY = useRef(0);
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const handleTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchMove = (e) => {
+    const currentY = e.touches[0].clientY;
+    const deltaY = currentY - touchStartY.current;
+    if (deltaY > 0) {
+      setDragOffset(deltaY);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (dragOffset > 75) {
+      // Swiped down significantly, trigger dismiss
+      if (onDismiss) onDismiss();
+    }
+    setDragOffset(0);
+  };
 
   return (
-    <div style={{ background: 'var(--bg-secondary)', padding: '12px 16px 16px 16px', borderRadius: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', border: '1px solid var(--border-primary)' }}>
-      {/* Mobile Modal Grab Bar */}
-      <div style={{ width: 36, height: 4, background: '#404040', borderRadius: 2, margin: '0 auto 10px auto' }} />
+    <div
+      style={{
+        background: 'var(--bg-secondary)',
+        padding: '10px 16px 16px 16px',
+        borderRadius: 'inherit',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        border: '1px solid var(--border-primary)',
+        transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : 'none',
+        transition: dragOffset > 0 ? 'none' : 'transform 0.2s ease',
+      }}
+    >
+      {/* Mobile Swipe-Down Handle Bar */}
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onClick={onDismiss}
+        style={{
+          width: '100%',
+          padding: '4px 0 10px 0',
+          cursor: 'pointer',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 2,
+        }}
+        title="Swipe down or tap to close card"
+      >
+        <div style={{ width: 42, height: 5, background: '#525252', borderRadius: 3 }} />
+        <span style={{ fontSize: '0.65rem', color: '#737373', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          Swipe down to view camera
+        </span>
+      </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div>
-          <span style={{ fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#ffffff' }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#ffffff' }}>
             {section.name}
           </span>
-          <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>Detected from photo &bull; Tap to adjust</p>
+          <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>Detected answers &bull; Tap to adjust</p>
         </div>
-        <button
-          onClick={onRetake}
-          style={{ padding: '4px 8px', fontSize: '0.72rem', background: 'transparent', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
-        >
-          Retake Photo
-        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            onClick={onRetake}
+            style={{ padding: '4px 8px', fontSize: '0.72rem', background: 'transparent', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
+          >
+            Retake
+          </button>
+          {onDismiss && (
+            <button
+              onClick={onDismiss}
+              title="Close card"
+              style={{ padding: '4px 6px', background: 'transparent', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
+            >
+              <ChevronDown size={14} />
+            </button>
+          )}
+        </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
