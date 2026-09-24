@@ -112,12 +112,43 @@
     <script type="module" src="/src/main.jsx"></script>
 
     <script>
-      // Smooth continuous percentage loader synced across 8 seconds
+      // Smooth continuous percentage loader synced across 8 seconds with loader-screen audio
       (function() {
         const duration = 8000;
         const startTime = performance.now();
         const percentEl = document.getElementById('splash-percentage');
         const splashEl = document.getElementById('app-splash');
+        let loaderAudio = null;
+
+        try {
+          loaderAudio = new Audio('/sounds/loader-screen.mp3');
+          loaderAudio.volume = 0.7;
+          const playPromise = loaderAudio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              // Browser may restrict autoplay before user gesture; play upon first touch/click
+              const onFirstGesture = () => {
+                if (loaderAudio && !loaderAudio.ended && splashEl && !splashEl.classList.contains('fade-out')) {
+                  loaderAudio.play().catch(() => {});
+                }
+                window.removeEventListener('pointerdown', onFirstGesture);
+                window.removeEventListener('click', onFirstGesture);
+              };
+              window.addEventListener('pointerdown', onFirstGesture);
+              window.addEventListener('click', onFirstGesture);
+            });
+          }
+        } catch (e) {}
+
+        function stopLoaderAudio() {
+          if (loaderAudio) {
+            try {
+              loaderAudio.pause();
+              loaderAudio.currentTime = 0;
+            } catch (e) {}
+            loaderAudio = null;
+          }
+        }
 
         function updateLoader(now) {
           const elapsed = now - startTime;
@@ -130,6 +161,7 @@
             requestAnimationFrame(updateLoader);
           } else {
             if (percentEl) percentEl.textContent = '100%';
+            stopLoaderAudio();
             if (splashEl) {
               splashEl.classList.add('fade-out');
               setTimeout(() => splashEl.remove(), 500);

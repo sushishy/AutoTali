@@ -1,16 +1,27 @@
 import React, { useEffect } from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { playPopupSound, stopPopupSound } from '../utils/audio';
 
 export default function PopupCard({ card, onClose }) {
   useEffect(() => {
     if (!card) return;
+
+    // Play dedicated popup sound (success or error)
+    playPopupSound(card.type);
+
     // Auto-dismiss success and info cards after 4.5 seconds
+    let timer;
     if (card.type !== 'error') {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         onClose();
       }, 4500);
-      return () => clearTimeout(timer);
     }
+
+    // Stop sound effect when popup card is closed or disappears
+    return () => {
+      if (timer) clearTimeout(timer);
+      stopPopupSound();
+    };
   }, [card, onClose]);
 
   if (!card) return null;

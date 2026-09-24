@@ -6,6 +6,7 @@ import DetectionReview from './components/DetectionReview';
 import ManualEntry from './components/ManualEntry';
 import SummaryView from './components/SummaryView';
 import PopupCard from './components/PopupCard';
+import { playSectionSuccess } from './utils/audio';
 
 export default function App() {
   const [popupCard, setPopupCard] = useState(null);
@@ -95,6 +96,7 @@ export default function App() {
 
     const nextIdx = advanceStep();
     if (nextIdx !== -1) {
+      playSectionSuccess();
       const nextSec = sections[nextIdx];
       setDetectedVal(nextSec && updated[nextSec.id] !== undefined ? updated[nextSec.id] : null);
       setFrozenOverlay(null);
