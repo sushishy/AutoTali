@@ -186,16 +186,45 @@ def save_survey(payload: SaveRequest):
 FRONTEND_DIST = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
 
 if os.path.exists(FRONTEND_DIST):
-    # Serve assets folder
     assets_dir = os.path.join(FRONTEND_DIST, "assets")
     if os.path.exists(assets_dir):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
-    # Serve index.html for all page requests
-    @app.get("/{full_path:path}")
-    def serve_frontend(full_path: str):
+@app.get("/{full_path:path}")
+def serve_frontend(full_path: str):
+    if os.path.exists(FRONTEND_DIST):
         target = os.path.join(FRONTEND_DIST, full_path)
         if full_path and os.path.isfile(target):
             return FileResponse(target)
-        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
+        index_file = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+
+    # Fallback if frontend/dist is ever missing
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(
+        """<!DOCTYPE html>
+        <html>
+        <head>
+            <title>AutoTali - Setup Required</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { background: #08080a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 16px; box-sizing: border-box; }
+                .card { background: #121212; border: 1px solid #262626; border-radius: 12px; padding: 32px 28px; max-width: 440px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+                h1 { margin-top: 0; font-size: 1.4rem; font-weight: 800; letter-spacing: 0.04em; }
+                p { color: #a3a3a3; line-height: 1.5; font-size: 0.88rem; margin: 12px 0; }
+                code { background: #1c1c1c; padding: 3px 8px; border-radius: 4px; color: #60a5fa; font-size: 0.85rem; }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h1>AutoTali Frontend Missing</h1>
+                <p>The pre-built frontend files were not found in <code>frontend/dist</code>.</p>
+                <p>Make sure the <code>frontend/dist</code> folder is extracted or run <code>npm run build</code> inside the <code>frontend</code> directory.</p>
+            </div>
+        </body>
+        </html>""",
+        status_code=200,
+    )
+
 

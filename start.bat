@@ -79,6 +79,17 @@ if %ERRORLEVEL% NEQ 0 (
 powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | ForEach-Object { if ($_.OwningProcess -gt 0) { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue } }" >nul 2>&1
 adb reverse tcp:8000 tcp:8000 >nul 2>&1
 
+:: Check if frontend bundle exists; auto-build if npm is present
+if not exist "%PROJECT_DIR%\frontend\dist\index.html" (
+    where npm >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        echo [AutoTali] Building frontend bundle...
+        pushd "%PROJECT_DIR%\frontend"
+        call npm run build >nul 2>&1
+        popd
+    )
+)
+
 :: ========================================================================
 :: 5. LAUNCH AUTOTALI SERVER
 :: ========================================================================
