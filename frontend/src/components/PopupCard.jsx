@@ -15,7 +15,13 @@ export default function PopupCard({ card, onClose }) {
 
   if (!card) return null;
 
-  const { title, message, type = 'info' } = card;
+  const title = typeof card.title === 'string'
+    ? card.title
+    : (typeof card.title === 'object' && card.title?.title ? String(card.title.title) : '');
+  const message = typeof card.message === 'string'
+    ? card.message
+    : (typeof card.message === 'object' && card.message?.message ? String(card.message.message) : '');
+  const type = card.type || 'info';
 
   const iconConfig = {
     success: { icon: CheckCircle2, color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' },

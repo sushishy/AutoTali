@@ -1,4 +1,5 @@
 # AutoTally — Questionnaire OMR Scanner
+
 ## Full Implementation Plan
 
 ---
@@ -11,9 +12,10 @@ A Python desktop app that uses a **phone camera via local WiFi (IP Webcam app)**
 
 ## Files (READ-ONLY — Never Modified Directly)
 
-| File | Path |
-|---|---|
-| `Tally.xlsx` | `C:\Users\User\OneDrive\Desktop\Tally.xlsx` |
+
+| File                                | Path                                                        |
+| ------------------------------------- | ------------------------------------------------------------- |
+| `Tally.xlsx`                        | `C:\Users\User\OneDrive\Desktop\Tally.xlsx`                 |
 | `Adapted_Survey_Questionnaire.docx` | `C:\Users\User\Downloads\Adapted_Survey_Questionnaire.docx` |
 
 ---
@@ -22,17 +24,19 @@ A Python desktop app that uses a **phone camera via local WiFi (IP Webcam app)**
 
 ### 7 Sections = 7 Scans per Respondent → 1 Row in Excel
 
-| Scan # | Section | Excel Column(s) | Answer Type | Options |
-|---|---|---|---|---|
-| 1 | Part I — SHS Strand | Col B | Single checkbox (3 choices) | 1=STEM, 2=TVL-ICT, 3=Non-Aligned |
-| 2 | A. Device Availability | Col C–G (Q1–Q5) | Grid (5 rows × 5 cols) | 1–5 scale |
-| 3 | B. Internet Connectivity | Col H–L (Q1–Q5) | Grid (5 rows × 5 cols) | 1–5 scale |
-| 4 | C. Frequency of ICT Use | Col M–Q (Q1–Q5) | Grid (5 rows × 5 cols) | 1–5 scale |
-| 5 | A. Perceived Academic Difficulty | Col R–V (Q1–Q5) | Grid (5 rows × 5 cols) | 1–5 scale |
-| 6 | B. Computing Self-Efficacy | Col W–AA (Q1–Q5) | Grid (5 rows × 5 cols) | 1–5 scale |
-| 7 | C. Academic Adjustment Behaviors | Col AB–AF (Q1–Q5) | Grid (5 rows × 5 cols) | 1–5 scale |
+
+| Scan # | Section                          | Excel Column(s)     | Answer Type                 | Options                          |
+| -------- | ---------------------------------- | --------------------- | ----------------------------- | ---------------------------------- |
+| 1      | Part I — SHS Strand             | Col B               | Single checkbox (3 choices) | 1=STEM, 2=TVL-ICT, 3=Non-Aligned |
+| 2      | A. Device Availability           | Col C–G (Q1–Q5)   | Grid (5 rows × 5 cols)     | 1–5 scale                       |
+| 3      | B. Internet Connectivity         | Col H–L (Q1–Q5)   | Grid (5 rows × 5 cols)     | 1–5 scale                       |
+| 4      | C. Frequency of ICT Use          | Col M–Q (Q1–Q5)   | Grid (5 rows × 5 cols)     | 1–5 scale                       |
+| 5      | A. Perceived Academic Difficulty | Col R–V (Q1–Q5)   | Grid (5 rows × 5 cols)     | 1–5 scale                       |
+| 6      | B. Computing Self-Efficacy       | Col W–AA (Q1–Q5)  | Grid (5 rows × 5 cols)     | 1–5 scale                       |
+| 7      | C. Academic Adjustment Behaviors | Col AB–AF (Q1–Q5) | Grid (5 rows × 5 cols)     | 1–5 scale                       |
 
 ### Excel Row Format (1 respondent = 1 row)
+
 ```
 Col A  | Col B  | Col C–G            | Col H–L                | Col M–Q               | Col R–V                       | Col W–AA                 | Col AB–AF
 Row #  | Strand | Device Avail Q1–Q5 | Internet Connect. Q1–5 | Freq. of ICT Use Q1–5 | Perceived Acad. Diff. Q1–5   | Computing Self-Eff. Q1–5 | Acad. Adj. Behav. Q1–5
@@ -45,12 +49,14 @@ Row #  | Strand | Device Avail Q1–Q5 | Internet Connect. Q1–5 | Freq. of ICT
 ## Physical Questionnaire Layout (confirmed from photos)
 
 ### Part I (Strand Section)
+
 - 3 vertical square checkboxes beside: STEM / TVL-ICT / Non-Aligned
 - Only 1 can be checked
 - Check mark style: bold ✓ inside a square box
 - Written with ballpen (dark ink)
 
 ### Sections A–C / Part II A–C (Grid Tables)
+
 - Table header row: `| No. | Statement | 5 | 4 | 3 | 2 | 1 |`
 - 5 rows (Q1–Q5), each row has 5 square checkboxes
 - Section title printed above table (e.g., "A. Device Availability")
@@ -62,17 +68,20 @@ Row #  | Strand | Device Avail Q1–Q5 | Internet Connect. Q1–5 | Freq. of ICT
 ## Camera Setup
 
 ### Requirements
+
 - Android phone with **IP Webcam** app (free — Play Store)
 - Phone + PC on the **same WiFi network**
 - No internet needed — 100% local
 
 ### How to Connect
+
 1. Open IP Webcam on phone → tap **"Start server"**
 2. Note the URL shown (e.g., `http://192.168.1.5:8080`)
 3. Enter that URL once in the scanner app settings
 4. OpenCV connects via: `cv2.VideoCapture("http://192.168.x.x:8080/video")`
 
 ### Best Scanning Technique
+
 - Place questionnaire **flat on a table**
 - Hold phone **directly above** the paper (bird's-eye view)
 - Good lighting = better detection accuracy
@@ -102,6 +111,7 @@ Row #  | Strand | Device Avail Q1–Q5 | Internet Connect. Q1–5 | Freq. of ICT
 ```
 
 ### Screen States
+
 1. **Live view** — camera feed with real-time checkbox overlay highlights
 2. **Capture** — freezes frame, shows detected values for confirmation
 3. **Edit** — user can manually correct any wrong detection before saving
@@ -113,6 +123,7 @@ Row #  | Strand | Device Avail Q1–Q5 | Internet Connect. Q1–5 | Freq. of ICT
 ## Detection Logic (OpenCV)
 
 ### For Grid Sections (Scans 2–7)
+
 ```
 1. Convert frame to grayscale
 2. Apply binary threshold → black/white image
@@ -128,6 +139,7 @@ Row #  | Strand | Device Avail Q1–Q5 | Internet Connect. Q1–5 | Freq. of ICT
 ```
 
 ### For Part I (Scan 1 — Strand)
+
 ```
 1. Detect 3 vertical square checkboxes on the left side
 2. Count dark pixels inside each checkbox
@@ -139,6 +151,7 @@ Row #  | Strand | Device Avail Q1–Q5 | Internet Connect. Q1–5 | Freq. of ICT
 ```
 
 ### Visual Overlay
+
 - **Green box** drawn over detected checked checkbox ✅
 - **Thin gray box** drawn over empty checkboxes
 - Makes it easy to verify before confirming
@@ -236,15 +249,17 @@ SECTIONS = [
 
 ## Tech Stack
 
-| Package | Purpose | Install |
-|---|---|---|
-| `opencv-python` | Camera stream + checkbox detection | `pip install opencv-python` |
-| `numpy` | Image array math | `pip install numpy` |
-| `openpyxl` | Read/write Tally.xlsx | `pip install openpyxl` |
-| `Pillow` | Convert OpenCV frame for Tkinter | `pip install Pillow` |
-| `tkinter` | Desktop GUI | Built into Python — no install |
+
+| Package         | Purpose                            | Install                         |
+| ----------------- | ------------------------------------ | --------------------------------- |
+| `opencv-python` | Camera stream + checkbox detection | `pip install opencv-python`     |
+| `numpy`         | Image array math                   | `pip install numpy`             |
+| `openpyxl`      | Read/write Tally.xlsx              | `pip install openpyxl`          |
+| `Pillow`        | Convert OpenCV frame for Tkinter   | `pip install Pillow`            |
+| `tkinter`       | Desktop GUI                        | Built into Python — no install |
 
 ### Full Install Command
+
 ```bash
 pip install opencv-python numpy openpyxl Pillow
 ```
@@ -268,12 +283,12 @@ Build these files in this exact order:
 
 ## Verification Checklist
 
-- [ ] Camera stream connects from phone to PC via IP Webcam
-- [ ] Detection works on the Part I (strand) section
-- [ ] Detection works on a grid section (Device Availability)
-- [ ] Green overlay shows on correct checked boxes
-- [ ] Edit/correction screen works
-- [ ] After 7 scans, full row written correctly to Tally.xlsx
-- [ ] Existing rows 3–17 in Tally.xlsx are untouched
-- [ ] Respondent number auto-increments correctly
-- [ ] App ready for next respondent after save
+- [X]  Camera stream connects from phone to PC via IP Webcam
+- [X]  Detection works on the Part I (strand) section
+- [X]  Detection works on a grid section (Device Availability)
+- [X]  Green overlay shows on correct checked boxes
+- [X]  Edit/correction screen works
+- [X]  After 7 scans, full row written correctly to Tally.xlsx
+- [X]  Existing rows 3–17 in Tally.xlsx are untouched
+- [X]  Respondent number auto-increments correctly
+- [X]  App ready for next respondent after save

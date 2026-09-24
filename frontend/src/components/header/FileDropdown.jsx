@@ -1,14 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FileSpreadsheet, ChevronDown, Check, Plus } from 'lucide-react';
 
 export default function FileDropdown({
   isOpen,
   onToggle,
+  onClose,
   activeFile,
   availableFiles = [],
   onSwitchFile,
   onOpenNewFileModal,
 }) {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        if (onClose) onClose();
+        else if (onToggle) onToggle();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose, onToggle]);
+
   return (
     <div style={{ position: 'relative' }}>
       <button
@@ -38,23 +55,45 @@ export default function FileDropdown({
       </button>
 
       {isOpen && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '110%',
-            right: 0,
-            width: 220,
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border-primary)',
-            borderRadius: 'var(--radius-sm)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            zIndex: 200,
-            padding: 4,
-          }}
-        >
+        <>
+          {/* Full-screen backdrop to close dropdown when clicking outside */}
+          <div
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (onClose) onClose();
+              else onToggle();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onClose) onClose();
+              else onToggle();
+            }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 190,
+              background: 'transparent',
+              cursor: 'default',
+            }}
+          />
+
+          <div
+            style={{
+              position: 'absolute',
+              top: '110%',
+              right: 0,
+              width: 220,
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: 'var(--radius-sm)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              zIndex: 200,
+              padding: 4,
+            }}
+          >
           <div
             style={{
               padding: '6px 8px',
@@ -71,8 +110,11 @@ export default function FileDropdown({
             <button
               key={file}
               onClick={() => {
-                if (onSwitchFile) onSwitchFile(file);
-                onToggle();
+                if (file !== activeFile && onSwitchFile) {
+                  onSwitchFile(file);
+                }
+                if (onClose) onClose();
+                else onToggle();
               }}
               style={{
                 padding: '8px 10px',
@@ -96,7 +138,8 @@ export default function FileDropdown({
           <div style={{ height: 1, background: 'var(--border-primary)', margin: '4px 0' }} />
           <button
             onClick={() => {
-              onToggle();
+              if (onClose) onClose();
+              else onToggle();
               onOpenNewFileModal();
             }}
             style={{
@@ -115,6 +158,7 @@ export default function FileDropdown({
             <Plus size={13} /> New Empty File...
           </button>
         </div>
+        </>
       )}
     </div>
   );

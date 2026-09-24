@@ -123,6 +123,7 @@ export default function StepHeader({
                 setModeDropdownOpen(!modeDropdownOpen);
                 setFileDropdownOpen(false);
               }}
+              onClose={() => setModeDropdownOpen(false)}
               activeTab={activeTab}
               onTabChange={onTabChange}
               phoneUrl={phoneUrl}
@@ -137,6 +138,7 @@ export default function StepHeader({
                 setFileDropdownOpen(!fileDropdownOpen);
                 setModeDropdownOpen(false);
               }}
+              onClose={() => setFileDropdownOpen(false)}
               activeFile={activeFile}
               availableFiles={availableFiles}
               onSwitchFile={onSwitchFile}

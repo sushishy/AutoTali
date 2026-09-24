@@ -10,8 +10,16 @@ import PopupCard from './components/PopupCard';
 
 export default function App() {
   const [popupCard, setPopupCard] = useState(null);
-  const showPopup = (title, message, type = 'info') => {
-    setPopupCard({ title, message, type });
+  const showPopup = (titleOrObj, message, type = 'info') => {
+    if (typeof titleOrObj === 'object' && titleOrObj !== null) {
+      setPopupCard({
+        title: titleOrObj.title || '',
+        message: titleOrObj.message || '',
+        type: titleOrObj.type || 'info',
+      });
+    } else {
+      setPopupCard({ title: titleOrObj, message, type });
+    }
   };
 
   const {

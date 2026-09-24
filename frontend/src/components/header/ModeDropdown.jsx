@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Camera, Edit3, FileText, ChevronDown, Smartphone, Check, Copy, Moon, Sun } from 'lucide-react';
 
 const MODE_ITEMS = [
@@ -10,6 +10,7 @@ const MODE_ITEMS = [
 export default function ModeDropdown({
   isOpen,
   onToggle,
+  onClose,
   activeTab,
   onTabChange,
   phoneUrl,
@@ -17,6 +18,22 @@ export default function ModeDropdown({
   onToggleTheme,
 }) {
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        if (onClose) onClose();
+        else if (onToggle) onToggle();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose, onToggle]);
 
   const CurrentModeIcon = MODE_ITEMS.find((m) => m.id === activeTab)?.icon || Camera;
   const currentLabel = MODE_ITEMS.find((m) => m.id === activeTab)?.label || 'Mode';
@@ -52,22 +69,44 @@ export default function ModeDropdown({
       </button>
 
       {isOpen && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '115%',
-            right: 0,
-            width: 210,
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border-primary)',
-            borderRadius: 'var(--radius-sm)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-            display: 'flex',
-            flexDirection: 'column',
-            zIndex: 200,
-            padding: 4,
-          }}
-        >
+        <>
+          {/* Full-screen backdrop to close dropdown when clicking outside */}
+          <div
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (onClose) onClose();
+              else onToggle();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onClose) onClose();
+              else onToggle();
+            }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 190,
+              background: 'transparent',
+              cursor: 'default',
+            }}
+          />
+
+          <div
+            style={{
+              position: 'absolute',
+              top: '115%',
+              right: 0,
+              width: 210,
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: 'var(--radius-sm)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              zIndex: 200,
+              padding: 4,
+            }}
+          >
           <div
             style={{
               padding: '5px 8px',
@@ -85,7 +124,8 @@ export default function ModeDropdown({
               key={id}
               onClick={() => {
                 onTabChange(id);
-                onToggle();
+                if (onClose) onClose();
+                else onToggle();
               }}
               style={{
                 padding: '7px 10px',
@@ -171,6 +211,7 @@ export default function ModeDropdown({
             </span>
           </button>
         </div>
+        </>
       )}
     </div>
   );

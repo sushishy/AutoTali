@@ -62,7 +62,7 @@ export default function NewFileModal({ isOpen, onClose, onCreate }) {
 
         <input
           type="text"
-          placeholder="e.g. Section_B.xlsx"
+          placeholder="name.xlsx"
           value={newFileName}
           autoFocus
           onChange={(e) => setNewFileName(e.target.value)}
