@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { ArrowRight, Save, ChevronLeft } from 'lucide-react';
+import { ArrowRight, Save, ChevronLeft, Dices } from 'lucide-react';
+import { generateRandomSectionAnswer } from '../utils/randomizer';
 import StrandSelector from './manual/StrandSelector';
 import LikertQuestionList from './manual/LikertQuestionList';
 
@@ -106,7 +107,7 @@ export default function ManualEntry({
         )}
 
         {/* Footer Navigation */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 10 }}>
           {canGoBack ? (
             <button
               type="button"
@@ -129,8 +130,33 @@ export default function ManualEntry({
               <ChevronLeft size={16} /> Back
             </button>
           ) : (
-            <div />
+            <div style={{ width: 85 }} />
           )}
+
+          {/* Randomizer Icon Button */}
+          <button
+            type="button"
+            onClick={() => onChange(generateRandomSectionAnswer(section))}
+            disabled={isProcessing}
+            title="Randomize section answers (best-possible rating)"
+            style={{
+              padding: '12px 18px',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              background: 'var(--bg-elevated)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: 'var(--radius-sm)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <Dices size={17} />
+            <span>Randomize</span>
+          </button>
 
           <button
             type="button"

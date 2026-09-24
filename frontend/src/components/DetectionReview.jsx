@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { RotateCcw, ArrowRight, Save, Check, ChevronLeft, ChevronDown, X } from 'lucide-react';
+import { RotateCcw, ArrowRight, Save, Check, ChevronLeft, ChevronDown, X, Dices } from 'lucide-react';
+import { generateRandomSectionAnswer } from '../utils/randomizer';
 
 export default function DetectionReview({
   section,
@@ -213,6 +214,27 @@ export default function DetectionReview({
           style={{ flex: 1, padding: 10, fontSize: '0.85rem', background: 'transparent', color: '#ffffff' }}
         >
           <RotateCcw size={14} /> Retake
+        </button>
+
+        <button
+          onClick={() => onChange(generateRandomSectionAnswer(section))}
+          disabled={isProcessing}
+          title="Randomize section answers (best possible rating)"
+          style={{
+            padding: '10px 12px',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            background: 'var(--bg-elevated)',
+            color: 'var(--text-primary)',
+            borderColor: 'var(--border-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 5,
+            cursor: 'pointer',
+          }}
+        >
+          <Dices size={15} /> Random
         </button>
 
         {(() => {

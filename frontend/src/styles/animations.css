@@ -134,3 +134,14 @@
     transform: translate(-50%, -50%) scale(1);
   }
 }
+
+@keyframes popupCardBottomRight {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
