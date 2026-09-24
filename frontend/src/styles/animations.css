@@ -1,0 +1,125 @@
+/* ==========================================================================
+   SCANNER LASER & VIEWFINDER ANIMATIONS
+   ========================================================================== */
+
+@keyframes scanLaser {
+  0% {
+    top: 5%;
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    top: 95%;
+    opacity: 0.2;
+  }
+}
+
+.scanner-laser-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #3b82f6 20%, #60a5fa 50%, #3b82f6 80%, transparent 100%);
+  box-shadow: 0 0 14px #3b82f6, 0 0 5px #60a5fa;
+  animation: scanLaser 2s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes lockFlashAnim {
+  0% {
+    box-shadow: inset 0 0 0 4px #3b82f6, 0 0 30px rgba(59, 130, 246, 0.85);
+    border-color: #3b82f6;
+  }
+  100% {
+    box-shadow: inset 0 0 0 0px transparent, 0 0 0px transparent;
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.viewfinder-locked {
+  animation: lockFlashAnim 0.5s ease-out forwards;
+}
+
+/* ==========================================================================
+   SCANNER STATUS PILL & PULSE DOTS
+   ========================================================================== */
+
+.scanner-status-pill {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  background: rgba(10, 10, 10, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] .scanner-status-pill {
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 6px #3b82f6;
+  animation: dotPulse 1s ease infinite alternate;
+}
+
+@keyframes dotPulse {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.3); opacity: 1; }
+}
+
+@keyframes dotPop {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.25); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.guide-dot-active {
+  width: 12px;
+  height: 12px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #3b82f6, 0 0 4px #93c5fd;
+  animation: dotPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.guide-dot-faint {
+  width: 4px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+}
+
+/* ==========================================================================
+   POPUP CARD ANIMATION
+   ========================================================================== */
+
+@keyframes popupCardSlide {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}

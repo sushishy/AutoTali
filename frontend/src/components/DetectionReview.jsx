@@ -76,7 +76,7 @@ export default function DetectionReview({
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div>
-          <span style={{ fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#ffffff' }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
             {section.name}
           </span>
           <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>Detected answers &bull; Tap to adjust</p>

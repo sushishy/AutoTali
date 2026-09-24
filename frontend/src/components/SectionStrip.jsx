@@ -37,7 +37,7 @@ export default function SectionStrip({
           style={{
             fontSize: '0.8rem',
             fontWeight: 600,
-            color: '#ffffff',
+            color: 'var(--text-primary)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',

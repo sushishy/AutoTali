@@ -4,10 +4,137 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>AutoTali — OMR Scanner</title>
+    <title>AutoTali</title>
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('autotali_theme') || 'dark';
+          document.documentElement.setAttribute('data-theme', t);
+        } catch(e) {}
+      })();
+    </script>
+    <style>
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: #08080a;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.45s ease;
+      }
+      #app-splash.fade-out {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .splash-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        animation: splashPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      @keyframes splashPop {
+        0% { opacity: 0; transform: scale(0.92) translateY(8px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      .splash-title {
+        font-size: 2.1rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #ffffff;
+        margin-bottom: 4px;
+        background: linear-gradient(135deg, #ffffff 40%, #93c5fd 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .splash-subtitle {
+        font-size: 0.82rem;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        color: rgba(255, 255, 255, 0.45);
+        margin-bottom: 24px;
+      }
+      .splash-bar-track {
+        width: 190px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+      }
+      .splash-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.85), 0 0 20px rgba(255, 255, 255, 0.4);
+        animation: fillLoader 8s linear forwards;
+      }
+      @keyframes fillLoader {
+        0% { width: 0%; }
+        100% { width: 100%; }
+      }
+      .splash-percentage {
+        margin-top: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        color: rgba(255, 255, 255, 0.7);
+        font-variant-numeric: tabular-nums;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
+      }
+    </style>
   </head>
   <body>
+    <!-- App Opening Splash Loader -->
+    <div id="app-splash">
+      <div class="splash-content">
+        <h1 class="splash-title">AutoTali</h1>
+        <p class="splash-subtitle">by sushimightbesoshy</p>
+        <div class="splash-bar-track">
+          <div class="splash-bar-fill"></div>
+        </div>
+        <div id="splash-percentage" class="splash-percentage">0%</div>
+      </div>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <script>
+      // Smooth continuous percentage loader synced across 8 seconds
+      (function() {
+        const duration = 8000;
+        const startTime = performance.now();
+        const percentEl = document.getElementById('splash-percentage');
+        const splashEl = document.getElementById('app-splash');
+
+        function updateLoader(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(Math.floor((elapsed / duration) * 100), 100);
+          if (percentEl) {
+            percentEl.textContent = progress + '%';
+          }
+
+          if (elapsed < duration) {
+            requestAnimationFrame(updateLoader);
+          } else {
+            if (percentEl) percentEl.textContent = '100%';
+            if (splashEl) {
+              splashEl.classList.add('fade-out');
+              setTimeout(() => splashEl.remove(), 500);
+            }
+          }
+        }
+        requestAnimationFrame(updateLoader);
+      })();
+    </script>
   </body>
 </html>

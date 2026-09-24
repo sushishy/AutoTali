@@ -4,6 +4,8 @@ import { useAutoScan } from '../hooks/useAutoScan';
 import ScannerToolbar from './scanner/ScannerToolbar';
 import ScannerViewfinder from './scanner/ScannerViewfinder';
 import ScannerShutter from './scanner/ScannerShutter';
+import ScannerCropAdjuster from './scanner/ScannerCropAdjuster';
+import { calculateGridCropRect, cropCanvasToRect, getGridDimensions } from '../utils/cropHelper';
 
 export default function CameraScanner({
   section = { type: 'grid' },
@@ -15,6 +17,7 @@ export default function CameraScanner({
   onViewAnswers,
   hasResult,
 }) {
+  const containerRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
@@ -26,6 +29,8 @@ export default function CameraScanner({
   const [hasTorch, setHasTorch] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [rawCapturedImage, setRawCapturedImage] = useState(null);
+  const [isAdjustingCrop, setIsAdjustingCrop] = useState(false);
 
   const { autoScanEnabled, toggleAutoScan, livePreview, liveAnswers, isAutoLocking } = useAutoScan({
     videoRef,
@@ -131,12 +136,41 @@ export default function CameraScanner({
     ctx.drawImage(video, -rawW / 2, -rawH / 2, rawW, rawH);
     ctx.restore();
 
-    onCapture?.(canvas.toDataURL('image/jpeg', 0.9));
+    const fullDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    setRawCapturedImage(fullDataUrl);
+
+    // Auto-crop to the on-screen grid ROI
+    let finalDataUrl = fullDataUrl;
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const isStrand = section.type === 'strand';
+      const { boxW, boxH } = getGridDimensions({
+        parentWidth: rect.width,
+        parentHeight: rect.height,
+        isStrand,
+        isSideways,
+      });
+      const cropRect = calculateGridCropRect({
+        containerWidth: rect.width,
+        containerHeight: rect.height,
+        videoWidth: canvas.width,
+        videoHeight: canvas.height,
+        boxW,
+        boxH,
+        isSideways,
+      });
+      const croppedCanvas = cropCanvasToRect(canvas, cropRect);
+      finalDataUrl = croppedCanvas.toDataURL('image/jpeg', 0.9);
+    }
+
+    onCapture?.(finalDataUrl);
   };
 
   // Re-sync video playback on unfreeze
   useEffect(() => {
     if (!frozenImage) {
+      setRawCapturedImage(null);
+      setIsAdjustingCrop(false);
       const activeTracks = streamRef.current
         ? streamRef.current.getVideoTracks().filter((t) => t.readyState === 'live')
         : [];
@@ -153,7 +187,10 @@ export default function CameraScanner({
   }, [frozenImage]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', background: '#0a0a0a', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div
+      ref={containerRef}
+      style={{ position: 'relative', width: '100%', height: '100%', background: '#0a0a0a', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+    >
       {/* Captured Frozen Image Overlay */}
       {frozenImage && (
         <img
@@ -221,8 +258,24 @@ export default function CameraScanner({
         hasResult={hasResult}
         onViewAnswers={onViewAnswers}
         onCaptureFrame={captureFrame}
-        onFileFallback={onCapture}
+        onFileFallback={(dataUrl) => {
+          setRawCapturedImage(dataUrl);
+          onCapture?.(dataUrl);
+        }}
+        onAdjustCrop={rawCapturedImage ? () => setIsAdjustingCrop(true) : null}
       />
+
+      {/* Interactive Crop Fine-Tuning Modal */}
+      {isAdjustingCrop && rawCapturedImage && (
+        <ScannerCropAdjuster
+          fullImage={rawCapturedImage}
+          onApplyCrop={(croppedUrl) => {
+            setIsAdjustingCrop(false);
+            onCapture?.(croppedUrl);
+          }}
+          onCancel={() => setIsAdjustingCrop(false)}
+        />
+      )}
     </div>
   );
 }

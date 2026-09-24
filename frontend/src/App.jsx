@@ -6,8 +6,14 @@ import CameraScanner from './components/CameraScanner';
 import DetectionReview from './components/DetectionReview';
 import ManualEntry from './components/ManualEntry';
 import SummaryView from './components/SummaryView';
+import PopupCard from './components/PopupCard';
 
 export default function App() {
+  const [popupCard, setPopupCard] = useState(null);
+  const showPopup = (title, message, type = 'info') => {
+    setPopupCard({ title, message, type });
+  };
+
   const {
     sections,
     currentStepIdx,
@@ -27,19 +33,17 @@ export default function App() {
     saveToExcel,
     advanceStep,
     resetSurvey,
-  } = useSurvey();
+  } = useSurvey(showPopup);
 
   const [frozenOverlay, setFrozenOverlay] = useState(null);
   const [detectedVal, setDetectedVal] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [notice, setNotice] = useState(null);
   const [isCardOpen, setIsCardOpen] = useState(false);
 
   const handleRetake = () => {
     setFrozenOverlay(null);
     setDetectedVal(null);
     setIsCardOpen(false);
-    setNotice(null);
   };
 
   const goToStep = (idx) => {
@@ -51,7 +55,6 @@ export default function App() {
 
   const handleCapture = async (base64Image) => {
     setIsProcessing(true);
-    setNotice('Analyzing checkboxes...');
     try {
       const res = await fetch('/api/detect', {
         method: 'POST',
@@ -63,12 +66,11 @@ export default function App() {
         setFrozenOverlay(data.overlay_base64);
         setDetectedVal(data.detected_value);
         setIsCardOpen(true);
-        setNotice(null);
       } else {
-        setNotice('Detection failed. Please retry.');
+        showPopup('Detection Issue', 'Detection failed. Please check alignment and retry.', 'error');
       }
     } catch {
-      setNotice('Network error connecting to backend.');
+      showPopup('Network Error', 'Network error connecting to backend.', 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -78,7 +80,6 @@ export default function App() {
     setFrozenOverlay(overlayBase64);
     setDetectedVal(detectedValue);
     setIsCardOpen(true);
-    setNotice(null);
   };
 
   const handleConfirmNext = async () => {
@@ -90,30 +91,39 @@ export default function App() {
       const nextSec = sections[nextIdx];
       setDetectedVal(nextSec && updated[nextSec.id] !== undefined ? updated[nextSec.id] : null);
       setFrozenOverlay(null);
-      setNotice(null);
+      setIsCardOpen(false);
     } else {
       setIsProcessing(true);
-      setNotice('Saving row to Tally.xlsx...');
       try {
         const data = await saveToExcel(updated);
         if (data.success) {
-          alert(`Saved respondent #${respondentNo} to Excel!\nReady for next respondent.`);
+          showPopup(
+            'Saved to Excel',
+            `Respondent #${respondentNo} saved successfully!\nReady for next respondent.`,
+            'success'
+          );
           resetSurvey(data.next_respondent_no);
           handleRetake();
         } else {
-          alert(`Failed saving to Excel: ${data.detail || 'Unknown error'}`);
+          showPopup(
+            'Save Failed',
+            `Failed saving to Excel: ${data.detail || 'Unknown error'}`,
+            'error'
+          );
         }
       } catch {
-        alert('Failed to connect to backend save endpoint.');
+        showPopup('Connection Error', 'Failed to connect to backend save endpoint.', 'error');
       } finally {
         setIsProcessing(false);
-        setNotice(null);
       }
     }
   };
 
   return (
     <div className="app-container">
+      {/* Sleek in-app popup notification card (replaces browser alerts) */}
+      <PopupCard card={popupCard} onClose={() => setPopupCard(null)} />
+
       <StepHeader
         respondentNo={respondentNo}
         currentStep={currentStepIdx + 1}
@@ -130,12 +140,6 @@ export default function App() {
         onSwitchFile={async (f) => (await switchFile(f)) && handleRetake()}
         onCreateNewFile={async (f) => (await createNewFile(f)) && handleRetake()}
       />
-
-      {notice && (
-        <div style={{ background: '#1c1c1c', borderBottom: '1px solid var(--border-primary)', color: '#ffffff', padding: '6px 16px', textAlign: 'center', fontSize: '0.8rem' }}>
-          {notice}
-        </div>
-      )}
 
       {activeTab !== 'guide' && (
         <SectionStrip

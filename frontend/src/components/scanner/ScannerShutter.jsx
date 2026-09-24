@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, Crop } from 'lucide-react';
 
 export default function ScannerShutter({
   frozenImage,
@@ -8,6 +8,7 @@ export default function ScannerShutter({
   onViewAnswers,
   onCaptureFrame,
   onFileFallback,
+  onAdjustCrop,
 }) {
   return (
     <div
@@ -18,14 +19,37 @@ export default function ScannerShutter({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 10,
+        gap: 8,
       }}
     >
-      {/* View Answers Pill Button (Mobile) */}
-      {hasResult && onViewAnswers && (
-        <button
-          onClick={onViewAnswers}
-          className="view-answers-pill"
+      {/* Top action pills (View Answers & Adjust Crop) */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        {frozenImage && onAdjustCrop && (
+          <button
+            onClick={onAdjustCrop}
+            style={{
+              padding: '7px 14px',
+              fontSize: '0.75rem',
+              background: 'rgba(10, 10, 10, 0.85)',
+              color: '#3b82f6',
+              border: '1.5px solid #3b82f6',
+              borderRadius: 20,
+              fontWeight: 700,
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.6)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              cursor: 'pointer',
+            }}
+          >
+            <Crop size={13} /> Adjust Crop
+          </button>
+        )}
+
+        {hasResult && onViewAnswers && (
+          <button
+            onClick={onViewAnswers}
+            className="view-answers-pill"
           style={{
             padding: '8px 18px',
             fontSize: '0.8rem',
@@ -44,6 +68,7 @@ export default function ScannerShutter({
           <span>View Answers</span> &rarr;
         </button>
       )}
+      </div>
 
       {/* Direct Camera Shutter */}
       <button

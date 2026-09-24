@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { playScanChirp, triggerHaptic } from '../utils/feedback';
+import { calculateGridCropRect, cropCanvasToRect, getGridDimensions } from '../utils/cropHelper';
 
 export function useAutoScan({
   videoRef,
@@ -77,6 +78,30 @@ export function useAutoScan({
       ctx.drawImage(video, -rawW / 2, -rawH / 2, rawW, rawH);
       ctx.restore();
 
+      let sampleDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+      const parentEl = video.parentElement;
+      if (parentEl) {
+        const rect = parentEl.getBoundingClientRect();
+        const isStrand = sectionId === 1;
+        const { boxW, boxH } = getGridDimensions({
+          parentWidth: rect.width,
+          parentHeight: rect.height,
+          isStrand,
+          isSideways,
+        });
+        const cropRect = calculateGridCropRect({
+          containerWidth: rect.width,
+          containerHeight: rect.height,
+          videoWidth: canvas.width,
+          videoHeight: canvas.height,
+          boxW,
+          boxH,
+          isSideways,
+        });
+        const cropped = cropCanvasToRect(canvas, cropRect);
+        sampleDataUrl = cropped.toDataURL('image/jpeg', 0.72);
+      }
+
       isLoopRunningRef.current = true;
       try {
         const res = await fetch('/api/detect', {
@@ -84,7 +109,7 @@ export function useAutoScan({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             section_id: sectionId,
-            image_base64: canvas.toDataURL('image/jpeg', 0.72),
+            image_base64: sampleDataUrl,
             return_overlay: true,
           }),
         });

@@ -47,19 +47,19 @@ export default function SummaryView({
                   padding: '10px 14px',
                   borderRadius: 'var(--radius-sm)',
                   background: isCurrent ? 'var(--bg-elevated)' : 'transparent',
-                  border: `1px solid ${isCurrent ? '#ffffff' : 'var(--border-primary)'}`,
+                  border: `1px solid ${isCurrent ? 'var(--text-primary)' : 'var(--border-primary)'}`,
                   cursor: 'pointer',
                 }}
               >
                 <div>
-                  <span style={{ fontWeight: 600, color: '#fff', fontSize: '0.85rem' }}>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>
                     {idx + 1}. {sec.name}
                   </span>
                 </div>
                 <span
                   style={{
                     fontWeight: 600,
-                    color: answer ? '#ffffff' : 'var(--text-muted)',
+                    color: answer ? 'var(--text-primary)' : 'var(--text-muted)',
                     fontSize: '0.85rem',
                   }}
                 >

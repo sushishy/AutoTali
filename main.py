@@ -1,5 +1,5 @@
 """
-AutoTally — Questionnaire OMR Scanner
+AutoTali
 Main Application Entry Point (Unified Web App)
 """
 import sys

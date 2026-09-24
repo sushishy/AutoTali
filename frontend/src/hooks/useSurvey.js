@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export function useSurvey() {
+export function useSurvey(notify) {
   const [sections, setSections] = useState([]);
   const [currentStepIdx, setCurrentStepIdx] = useState(() => {
     const saved = localStorage.getItem('autotali_step');
@@ -78,12 +78,25 @@ export function useSurvey() {
         setRespondentNo(data.next_respondent_no);
         setCurrentStepIdx(0);
         setCollectedData({});
+        notify?.({
+          title: 'File Switched',
+          message: `Active questionnaire is now ${data.active_file}`,
+          type: 'success',
+        });
         return true;
       }
-      alert(`Failed to switch file: ${data.detail || 'Error'}`);
+      notify?.({
+        title: 'Switch Failed',
+        message: data.detail || 'Could not switch file',
+        type: 'error',
+      });
       return false;
     } catch {
-      alert('Network error switching file');
+      notify?.({
+        title: 'Network Error',
+        message: 'Network error switching file.',
+        type: 'error',
+      });
       return false;
     }
   };
@@ -106,13 +119,25 @@ export function useSurvey() {
         setRespondentNo(data.next_respondent_no || 1);
         setCurrentStepIdx(0);
         setCollectedData({});
-        alert(`Created and switched to empty questionnaire: ${filename}`);
+        notify?.({
+          title: 'Questionnaire Created',
+          message: `Created and switched to empty questionnaire: ${filename}`,
+          type: 'success',
+        });
         return true;
       }
-      alert(`Could not create file: ${data.detail || 'Error'}`);
+      notify?.({
+        title: 'Creation Failed',
+        message: data.detail || 'Could not create file',
+        type: 'error',
+      });
       return false;
     } catch {
-      alert('Network error creating file');
+      notify?.({
+        title: 'Network Error',
+        message: 'Network error creating file.',
+        type: 'error',
+      });
       return false;
     }
   };

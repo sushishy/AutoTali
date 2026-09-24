@@ -116,7 +116,7 @@ class GridDetector:
 
         contours, _ = cv2.findContours(table_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         min_area = (w * h) * 0.10
-        max_area = (w * h) * 0.95
+        max_area = (w * h) * 0.99
         best_box = None
         best_area = 0
 
@@ -133,6 +133,6 @@ class GridDetector:
         if best_box:
             return best_box, True
 
-        # Fallback centered box (viewfinder framing)
-        gw, gh = int(w * 0.78), int(h * 0.68)
-        return (int((w - gw) / 2), int((h - gh) / 2), gw, gh), False
+        # Fallback centered box (for cropped images, table occupies nearly full frame)
+        gw, gh = int(w * 0.96), int(h * 0.94)
+        return (int((w - gw) / 2), int((h - gh) / 2), gw, gh), True

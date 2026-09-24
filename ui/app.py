@@ -17,7 +17,7 @@ from ui.side_panel import SidePanel
 class AutoTallyApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("AutoTally — Questionnaire OMR Scanner")
+        self.title("AutoTali")
         self.geometry("1100x820")
         self.minsize(980, 720)
 

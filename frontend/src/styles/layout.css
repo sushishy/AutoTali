@@ -1,0 +1,117 @@
+/* ==========================================================================
+   APP CONTAINER & GRID LAYOUT
+   ========================================================================== */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  width: 100vw;
+  overflow: hidden;
+}
+
+.scanner-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) 350px;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.camera-container-box {
+  height: 100%;
+  width: 100%;
+  display: flex;
+}
+
+.review-container-box {
+  height: 100%;
+}
+
+/* "View Answers" pill — hidden on desktop */
+.view-answers-pill {
+  display: none !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE MOBILE STYLES (<= 768px)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .scanner-grid {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .camera-container-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100% !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    border-radius: 0;
+  }
+
+  /* Popup Bottom Card on Phone Screen */
+  .review-container-box {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: min(72vh, 480px) !important;
+    max-height: 75vh;
+    z-index: 50;
+    border-radius: 16px 16px 0 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .review-container-box.hidden-mobile {
+    transform: translateY(105%);
+    pointer-events: none;
+  }
+
+  /* Compact header on small screens */
+  .phone-url-text {
+    display: none !important;
+  }
+
+  /* Show "View Answers" pill only on mobile */
+  .view-answers-pill {
+    display: inline-flex !important;
+  }
+
+  .active-file-label {
+    max-width: 60px !important;
+  }
+
+  /* Manual mode card adjustments on mobile */
+  .manual-entry-card {
+    padding: 14px !important;
+    gap: 12px !important;
+    border-radius: var(--radius-sm) !important;
+  }
+
+  .likert-scale-btn {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+[data-theme="light"] .review-container-box {
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12);
+}

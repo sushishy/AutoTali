@@ -13,11 +13,19 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXCEL_DIR = os.path.join(BASE_DIR, "excel")
 DEFAULT_EXCEL_FILENAME = "Tally.xlsx"
 EXCEL_PATH = os.path.join(EXCEL_DIR, DEFAULT_EXCEL_FILENAME)
-DESKTOP_EXCEL_PATH = r"C:\Users\User\OneDrive\Desktop\Tally.xlsx"
 
-# If excel/Tally.xlsx doesn't exist yet, fall back to desktop path
-if not os.path.exists(EXCEL_PATH) and os.path.exists(DESKTOP_EXCEL_PATH):
-    EXCEL_PATH = DESKTOP_EXCEL_PATH
+# Dynamic Desktop fallback across any Windows user profile or OneDrive
+user_home = os.path.expanduser("~")
+possible_desktop_paths = [
+    os.path.join(user_home, "Desktop", DEFAULT_EXCEL_FILENAME),
+    os.path.join(user_home, "OneDrive", "Desktop", DEFAULT_EXCEL_FILENAME),
+]
+
+if not os.path.exists(EXCEL_PATH):
+    for p in possible_desktop_paths:
+        if os.path.exists(p):
+            EXCEL_PATH = p
+            break
 
 DATA_START_ROW = 3  # First data row in Excel (rows 1-2 are headers)
 

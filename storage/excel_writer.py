@@ -5,8 +5,11 @@ Preserves existing data and accurately identifies next unfilled row.
 """
 import os
 import openpyxl
+from openpyxl.styles import Alignment
 from openpyxl.utils import column_index_from_string
 import config
+
+CENTER_ALIGNMENT = Alignment(horizontal="center", vertical="center")
 
 
 class ExcelWriter:
@@ -130,7 +133,8 @@ class ExcelWriter:
                 target_row = config.DATA_START_ROW
 
             # Write Column A: Respondent #
-            ws.cell(row=target_row, column=1, value=int(respondent_no))
+            cell_a = ws.cell(row=target_row, column=1, value=int(respondent_no))
+            cell_a.alignment = CENTER_ALIGNMENT
 
             # Write each section's data
             for sec in config.SECTIONS:
@@ -140,13 +144,15 @@ class ExcelWriter:
 
                 if sec["type"] == "strand":
                     col_idx = column_index_from_string(cols[0])
-                    ws.cell(row=target_row, column=col_idx, value=int(val) if val is not None else "")
+                    cell = ws.cell(row=target_row, column=col_idx, value=int(val) if val is not None else "")
+                    cell.alignment = CENTER_ALIGNMENT
                 elif sec["type"] == "grid":
                     vals_list = val if isinstance(val, (list, tuple)) else []
                     for i, col_letter in enumerate(cols):
                         col_idx = column_index_from_string(col_letter)
                         item_val = vals_list[i] if i < len(vals_list) else ""
-                        ws.cell(row=target_row, column=col_idx, value=int(item_val) if item_val != "" else "")
+                        cell = ws.cell(row=target_row, column=col_idx, value=int(item_val) if item_val != "" else "")
+                        cell.alignment = CENTER_ALIGNMENT
 
             wb.save(self.excel_path)
             wb.close()
@@ -197,20 +203,21 @@ class ExcelWriter:
                 # Copy header rows (Row 1 and Row 2)
                 for r in range(1, config.DATA_START_ROW):
                     for c in range(1, 33):
-                        new_ws.cell(row=r, column=c, value=src_ws.cell(row=r, column=c).value)
+                        cell = new_ws.cell(row=r, column=c, value=src_ws.cell(row=r, column=c).value)
+                        cell.alignment = CENTER_ALIGNMENT
                 src_wb.close()
             else:
                 # Build fresh headers from scratch
                 new_wb = openpyxl.Workbook()
                 new_ws = new_wb.active
                 new_ws.title = "Tally"
-                new_ws.cell(row=1, column=1, value="Respondent #")
-                new_ws.cell(row=2, column=1, value="No.")
+                new_ws.cell(row=1, column=1, value="Respondent #").alignment = CENTER_ALIGNMENT
+                new_ws.cell(row=2, column=1, value="No.").alignment = CENTER_ALIGNMENT
                 col_i = 2
                 for sec in config.SECTIONS:
                     for c_letter in sec["cols"]:
-                        new_ws.cell(row=1, column=col_i, value=sec["name"])
-                        new_ws.cell(row=2, column=col_i, value=c_letter)
+                        new_ws.cell(row=1, column=col_i, value=sec["name"]).alignment = CENTER_ALIGNMENT
+                        new_ws.cell(row=2, column=col_i, value=c_letter).alignment = CENTER_ALIGNMENT
                         col_i += 1
 
             new_wb.save(target_path)
