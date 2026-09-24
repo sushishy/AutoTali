@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Edit3, FileText, ChevronDown, Smartphone, Check, Copy, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
+import { Camera, Edit3, FileText, ChevronDown, Smartphone, Check, Copy, Moon, Sun, Volume2, VolumeX, ShieldCheck } from 'lucide-react';
 
 const MODE_ITEMS = [
   { id: 'scanner', label: 'Scanner', icon: Camera },
@@ -18,6 +18,7 @@ export default function ModeDropdown({
   onToggleTheme,
   isMuted,
   onToggleMute,
+  onOpenTerms,
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -259,6 +260,38 @@ export default function ModeDropdown({
               {isMuted ? 'Muted' : 'On'}
             </span>
           </button>
+
+          {/* Terms & Conditions Button */}
+          {onOpenTerms && (
+            <>
+              <div style={{ height: 1, background: 'var(--border-primary)', margin: '4px 0' }} />
+              <button
+                onClick={() => {
+                  if (onClose) onClose();
+                  onOpenTerms();
+                }}
+                title="View AutoTali Terms & Conditions"
+                style={{
+                  padding: '7px 10px',
+                  fontSize: '0.75rem',
+                  background: 'transparent',
+                  color: 'var(--text-primary)',
+                  border: 'none',
+                  borderRadius: 'var(--radius-xs)',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  fontWeight: 500,
+                  gap: 6,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <ShieldCheck size={13} color="var(--text-secondary)" />
+                  <span>Terms & Conditions</span>
+                </div>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>View</span>
+              </button>
+            </>
+          )}
         </div>
         </>
       )}

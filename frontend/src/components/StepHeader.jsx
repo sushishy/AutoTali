@@ -16,6 +16,7 @@ export default function StepHeader({
   availableFiles = ['Tally.xlsx'],
   onSwitchFile,
   onCreateNewFile,
+  onOpenTerms,
 }) {
   const [modeDropdownOpen, setModeDropdownOpen] = useState(false);
   const [fileDropdownOpen, setFileDropdownOpen] = useState(false);
@@ -138,6 +139,7 @@ export default function StepHeader({
               onToggleTheme={toggleTheme}
               isMuted={isMuted}
               onToggleMute={handleToggleMute}
+              onOpenTerms={onOpenTerms}
             />
 
             {/* Active Excel File Dropdown */}

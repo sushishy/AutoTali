@@ -6,10 +6,38 @@ import DetectionReview from './components/DetectionReview';
 import ManualEntry from './components/ManualEntry';
 import SummaryView from './components/SummaryView';
 import PopupCard from './components/PopupCard';
+import TermsModal from './components/TermsModal';
 import { playSectionSuccess } from './utils/audio';
 
 export default function App() {
   const [popupCard, setPopupCard] = useState(null);
+  const [showTermsModal, setShowTermsModal] = useState(() => {
+    try {
+      return localStorage.getItem('autotali_terms_accepted') !== 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [canDismissTerms, setCanDismissTerms] = useState(() => {
+    try {
+      return localStorage.getItem('autotali_terms_accepted') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleAcceptTerms = () => {
+    try {
+      localStorage.setItem('autotali_terms_accepted', 'true');
+    } catch {}
+    setShowTermsModal(false);
+    setCanDismissTerms(true);
+  };
+
+  const handleOpenTermsManually = () => {
+    setCanDismissTerms(true);
+    setShowTermsModal(true);
+  };
   const showPopup = (titleOrObj, message, type = 'info') => {
     if (typeof titleOrObj === 'object' && titleOrObj !== null) {
       setPopupCard({
@@ -133,6 +161,14 @@ export default function App() {
       {/* Sleek in-app popup notification card (replaces browser alerts) */}
       <PopupCard card={popupCard} onClose={() => setPopupCard(null)} />
 
+      {/* First-time opening Terms and Conditions modal with blurred background */}
+      <TermsModal
+        isOpen={showTermsModal}
+        onAccept={handleAcceptTerms}
+        onClose={() => setShowTermsModal(false)}
+        canDismiss={canDismissTerms}
+      />
+
       <StepHeader
         respondentNo={respondentNo}
         currentStep={currentStepIdx + 1}
@@ -148,6 +184,7 @@ export default function App() {
         availableFiles={availableFiles}
         onSwitchFile={async (f) => (await switchFile(f)) && handleRetake()}
         onCreateNewFile={async (f) => (await createNewFile(f)) && handleRetake()}
+        onOpenTerms={handleOpenTermsManually}
       />
 
       {activeTab === 'manual' ? (
