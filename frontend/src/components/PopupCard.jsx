@@ -35,13 +35,13 @@ export default function PopupCard({ card, onClose }) {
     <div
       style={{
         position: 'fixed',
-        top: 20,
+        top: '50%',
         left: '50%',
-        transform: 'translateX(-50%)',
+        transform: 'translate(-50%, -50%)',
         zIndex: 99999,
         maxWidth: '92vw',
         width: 390,
-        animation: 'popupCardSlide 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        animation: 'popupCardCenter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards',
       }}
     >
       <div

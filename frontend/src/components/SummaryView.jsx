@@ -8,11 +8,21 @@ export default function SummaryView({
   onSelectStep,
 }) {
   return (
-    <main style={{ flex: 1, padding: 20, overflowY: 'auto' }}>
+    <main
+      style={{
+        flex: 1,
+        padding: 20,
+        overflowY: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
       <div
         style={{
           maxWidth: 760,
-          margin: '0 auto',
+          width: '100%',
+          margin: 'auto',
           background: 'var(--bg-secondary)',
           padding: 20,
           borderRadius: 'var(--radius-md)',

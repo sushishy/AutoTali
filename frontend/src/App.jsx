@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useSurvey } from './hooks/useSurvey';
 import StepHeader from './components/StepHeader';
-import SectionStrip from './components/SectionStrip';
 import CameraScanner from './components/CameraScanner';
 import DetectionReview from './components/DetectionReview';
 import ManualEntry from './components/ManualEntry';
@@ -148,16 +147,6 @@ export default function App() {
         onSwitchFile={async (f) => (await switchFile(f)) && handleRetake()}
         onCreateNewFile={async (f) => (await createNewFile(f)) && handleRetake()}
       />
-
-      {activeTab !== 'guide' && (
-        <SectionStrip
-          currentStep={currentStepIdx + 1}
-          totalSteps={sections.length || 7}
-          sectionName={currentSection.name}
-          canGoBack={currentStepIdx > 0}
-          onPrevious={() => goToStep(currentStepIdx - 1)}
-        />
-      )}
 
       {activeTab === 'manual' ? (
         <main style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>

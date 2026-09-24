@@ -38,13 +38,24 @@ export default function ManualEntry({
     : values.length === 5 && values.every((v) => v !== null && v !== undefined && v >= 1 && v <= 5);
 
   return (
-    <div ref={scrollRef} style={{ flex: 1, padding: '12px', overflowY: 'auto' }}>
+    <div
+      ref={scrollRef}
+      style={{
+        flex: 1,
+        padding: '16px',
+        overflowY: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
       <div
         className="manual-entry-card"
         style={{
           maxWidth: 680,
+          width: '100%',
           minHeight: 460,
-          margin: '0 auto',
+          margin: 'auto',
           background: 'var(--bg-secondary)',
           padding: 20,
           borderRadius: 'var(--radius-md)',
