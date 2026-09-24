@@ -93,6 +93,43 @@
         font-variant-numeric: tabular-nums;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
       }
+      .splash-sound-btn {
+        margin-top: 16px;
+        font-family: inherit;
+        font-size: 0.76rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        padding: 7px 16px;
+        border-radius: 24px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        user-select: none;
+      }
+      .splash-sound-btn:hover {
+        background: rgba(255, 255, 255, 0.16);
+        border-color: rgba(255, 255, 255, 0.38);
+        transform: translateY(-1px);
+      }
+      .splash-sound-btn:active {
+        transform: scale(0.96);
+        background: rgba(255, 255, 255, 0.24);
+      }
+      .splash-sound-btn.playing {
+        border-color: rgba(16, 185, 129, 0.45);
+        background: rgba(16, 185, 129, 0.14);
+        color: #10b981;
+      }
     </style>
   </head>
   <body>
@@ -105,6 +142,12 @@
           <div class="splash-bar-fill"></div>
         </div>
         <div id="splash-percentage" class="splash-percentage">0%</div>
+
+        <!-- Dedicated Sound Button (works on phones & desktop) -->
+        <button id="splash-sound-btn" class="splash-sound-btn" type="button" title="Enable loader audio">
+          <span id="splash-sound-icon">🔊</span>
+          <span id="splash-sound-text">Sound On</span>
+        </button>
       </div>
     </div>
 
@@ -122,6 +165,9 @@
         const percentEl = document.getElementById('splash-percentage');
         const splashEl = document.getElementById('app-splash');
         const loaderAudio = document.getElementById('loader-audio-el');
+        const soundBtn = document.getElementById('splash-sound-btn');
+        const soundText = document.getElementById('splash-sound-text');
+        const soundIcon = document.getElementById('splash-sound-icon');
 
         const isMuted = (() => {
           try {
@@ -131,29 +177,52 @@
           }
         })();
 
+        function setSoundActiveUI() {
+          if (soundBtn) {
+            soundBtn.classList.add('playing');
+            if (soundText) soundText.textContent = 'Playing';
+            if (soundIcon) soundIcon.textContent = '🎵';
+          }
+        }
+
+        function enableSound() {
+          if (!loaderAudio) return;
+          loaderAudio.muted = false;
+          loaderAudio.volume = 0.8;
+          loaderAudio.play().then(() => {
+            setSoundActiveUI();
+          }).catch(() => {});
+        }
+
+        if (soundBtn) {
+          if (isMuted) {
+            if (soundText) soundText.textContent = 'Muted';
+            if (soundIcon) soundIcon.textContent = '🔇';
+          }
+
+          soundBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            enableSound();
+          });
+          soundBtn.addEventListener('touchend', function(e) {
+            e.stopPropagation();
+            enableSound();
+          });
+        }
+
         if (loaderAudio) {
-          loaderAudio.volume = 0.75;
+          loaderAudio.volume = 0.8;
           if (isMuted) {
             loaderAudio.muted = true;
             loaderAudio.pause();
           } else {
-            // Attempt immediate direct playback
+            // Attempt immediate playback (succeeds on desktop or if user previously interacted)
             const playPromise = loaderAudio.play();
             if (playPromise !== undefined) {
-              playPromise.catch(() => {
-                // If browser autoplay policy suspends playback before user gesture,
-                // seamlessly start audio on the first gesture anywhere on screen
-                const unlock = () => {
-                  if (loaderAudio && !loaderAudio.ended && splashEl && !splashEl.classList.contains('fade-out')) {
-                    loaderAudio.play().catch(() => {});
-                  }
-                  ['pointerdown', 'click', 'keydown', 'touchstart'].forEach((evt) => {
-                    window.removeEventListener(evt, unlock);
-                  });
-                };
-                ['pointerdown', 'click', 'keydown', 'touchstart'].forEach((evt) => {
-                  window.addEventListener(evt, unlock, { once: true, passive: true });
-                });
+              playPromise.then(() => {
+                setSoundActiveUI();
+              }).catch(() => {
+                // Mobile browser policy requires user tap on Sound On button
               });
             }
           }
