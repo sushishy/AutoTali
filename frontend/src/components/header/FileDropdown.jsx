@@ -72,8 +72,11 @@ export default function FileDropdown({
               position: 'fixed',
               inset: 0,
               zIndex: 190,
-              background: 'transparent',
+              background: 'rgba(0, 0, 0, 0.45)',
+              backdropFilter: 'blur(5px)',
+              WebkitBackdropFilter: 'blur(5px)',
               cursor: 'default',
+              animation: 'fadeIn 0.2s ease-out forwards',
             }}
           />
 
@@ -86,7 +89,7 @@ export default function FileDropdown({
               background: 'var(--bg-elevated)',
               border: '1px solid var(--border-primary)',
               borderRadius: 'var(--radius-sm)',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+              boxShadow: '0 16px 40px rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.2)',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',

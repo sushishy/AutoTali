@@ -4,6 +4,7 @@ import RespondentModal from './header/RespondentModal';
 import NewFileModal from './header/NewFileModal';
 import ModeDropdown from './header/ModeDropdown';
 import FileDropdown from './header/FileDropdown';
+import { isSoundMuted, toggleSoundMuted } from '../utils/audio';
 
 export default function StepHeader({
   respondentNo,
@@ -20,6 +21,12 @@ export default function StepHeader({
   const [fileDropdownOpen, setFileDropdownOpen] = useState(false);
   const [showRespModal, setShowRespModal] = useState(false);
   const [showNewFileModal, setShowNewFileModal] = useState(false);
+  const [isMuted, setIsMuted] = useState(() => isSoundMuted());
+
+  const handleToggleMute = () => {
+    const next = toggleSoundMuted();
+    setIsMuted(next);
+  };
 
   // Theme Management
   const [theme, setTheme] = useState(() => {
@@ -34,7 +41,7 @@ export default function StepHeader({
     document.documentElement.setAttribute('data-theme', theme);
     try {
       localStorage.setItem('autotali_theme', theme);
-    } catch {}
+    } catch { }
   }, [theme]);
 
   const toggleTheme = () => {
@@ -129,6 +136,8 @@ export default function StepHeader({
               phoneUrl={phoneUrl}
               theme={theme}
               onToggleTheme={toggleTheme}
+              isMuted={isMuted}
+              onToggleMute={handleToggleMute}
             />
 
             {/* Active Excel File Dropdown */}

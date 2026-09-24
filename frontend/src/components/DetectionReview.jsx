@@ -221,20 +221,18 @@ export default function DetectionReview({
           disabled={isProcessing}
           title="Randomize section answers (best possible rating)"
           style={{
-            padding: '10px 12px',
-            fontSize: '0.82rem',
-            fontWeight: 600,
+            padding: '10px 14px',
             background: 'var(--bg-elevated)',
             color: 'var(--text-primary)',
             borderColor: 'var(--border-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 5,
             cursor: 'pointer',
+            borderRadius: 'var(--radius-sm)',
           }}
         >
-          <Dices size={15} /> Random
+          <Dices size={16} />
         </button>
 
         {(() => {

@@ -141,21 +141,18 @@ export default function ManualEntry({
             title="Randomize section answers (best-possible rating)"
             style={{
               padding: '12px 18px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
               background: 'var(--bg-elevated)',
               color: 'var(--text-primary)',
               border: '1px solid var(--border-primary)',
               borderRadius: 'var(--radius-sm)',
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
+              justifyContent: 'center',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
           >
-            <Dices size={17} />
-            <span>Randomize</span>
+            <Dices size={18} />
           </button>
 
           <button

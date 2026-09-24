@@ -108,37 +108,56 @@
       </div>
     </div>
 
+    <!-- Direct Loader Audio Element -->
+    <audio id="loader-audio-el" src="/sounds/loader-screen.mp3" autoplay playsinline preload="auto"></audio>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 
     <script>
-      // Smooth continuous percentage loader synced across 8 seconds with loader-screen audio
+      // Smooth continuous percentage loader synced across 8 seconds with direct loader-screen audio
       (function() {
         const duration = 8000;
         const startTime = performance.now();
         const percentEl = document.getElementById('splash-percentage');
         const splashEl = document.getElementById('app-splash');
-        let loaderAudio = null;
+        const loaderAudio = document.getElementById('loader-audio-el');
 
-        try {
-          loaderAudio = new Audio('/sounds/loader-screen.mp3');
-          loaderAudio.volume = 0.7;
-          const playPromise = loaderAudio.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(() => {
-              // Browser may restrict autoplay before user gesture; play upon first touch/click
-              const onFirstGesture = () => {
-                if (loaderAudio && !loaderAudio.ended && splashEl && !splashEl.classList.contains('fade-out')) {
-                  loaderAudio.play().catch(() => {});
-                }
-                window.removeEventListener('pointerdown', onFirstGesture);
-                window.removeEventListener('click', onFirstGesture);
-              };
-              window.addEventListener('pointerdown', onFirstGesture);
-              window.addEventListener('click', onFirstGesture);
-            });
+        const isMuted = (() => {
+          try {
+            return localStorage.getItem('autotali_sound_muted') === 'true';
+          } catch {
+            return false;
           }
-        } catch (e) {}
+        })();
+
+        if (loaderAudio) {
+          loaderAudio.volume = 0.75;
+          if (isMuted) {
+            loaderAudio.muted = true;
+            loaderAudio.pause();
+          } else {
+            // Attempt immediate direct playback
+            const playPromise = loaderAudio.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(() => {
+                // If browser autoplay policy suspends playback before user gesture,
+                // seamlessly start audio on the first gesture anywhere on screen
+                const unlock = () => {
+                  if (loaderAudio && !loaderAudio.ended && splashEl && !splashEl.classList.contains('fade-out')) {
+                    loaderAudio.play().catch(() => {});
+                  }
+                  ['pointerdown', 'click', 'keydown', 'touchstart'].forEach((evt) => {
+                    window.removeEventListener(evt, unlock);
+                  });
+                };
+                ['pointerdown', 'click', 'keydown', 'touchstart'].forEach((evt) => {
+                  window.addEventListener(evt, unlock, { once: true, passive: true });
+                });
+              });
+            }
+          }
+        }
 
         function stopLoaderAudio() {
           if (loaderAudio) {
@@ -146,7 +165,6 @@
               loaderAudio.pause();
               loaderAudio.currentTime = 0;
             } catch (e) {}
-            loaderAudio = null;
           }
         }
 
@@ -164,7 +182,10 @@
             stopLoaderAudio();
             if (splashEl) {
               splashEl.classList.add('fade-out');
-              setTimeout(() => splashEl.remove(), 500);
+              setTimeout(() => {
+                splashEl.remove();
+                if (loaderAudio) loaderAudio.remove();
+              }, 500);
             }
           }
         }

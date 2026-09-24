@@ -43,30 +43,50 @@ export default function PopupCard({ card, onClose }) {
   const Icon = iconConfig.icon;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        bottom: 24,
-        right: 24,
-        zIndex: 99999,
-        maxWidth: 'calc(100vw - 32px)',
-        width: 360,
-        animation: 'popupCardBottomRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-      }}
-    >
+    <>
+      {/* Full-screen blurred backdrop around popup card - click anywhere to dismiss */}
       <div
+        onClick={onClose}
         style={{
-          background: 'var(--bg-elevated)',
-          border: '1px solid var(--border-primary)',
-          borderRadius: 'var(--radius-md)',
-          padding: '14px 16px',
-          boxShadow: '0 14px 40px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.15)',
-          backdropFilter: 'blur(16px)',
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: 12,
+          position: 'fixed',
+          inset: 0,
+          zIndex: 99990,
+          background: 'rgba(0, 0, 0, 0.4)',
+          backdropFilter: 'blur(5px)',
+          WebkitBackdropFilter: 'blur(5px)',
+          cursor: 'pointer',
+          animation: 'fadeIn 0.2s ease-out forwards',
+        }}
+      />
+
+      <div
+        onClick={onClose}
+        title="Click to dismiss"
+        style={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 99999,
+          maxWidth: 'calc(100vw - 32px)',
+          width: 360,
+          cursor: 'pointer',
+          animation: 'popupCardBottomRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         }}
       >
+        <div
+          style={{
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-md)',
+            padding: '14px 16px',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 1px rgba(255, 255, 255, 0.25)',
+            backdropFilter: 'blur(16px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 12,
+            transition: 'transform 0.15s ease, border-color 0.15s ease',
+          }}
+        >
         <div
           style={{
             width: 34,
@@ -127,5 +147,6 @@ export default function PopupCard({ card, onClose }) {
         </button>
       </div>
     </div>
+    </>
   );
 }

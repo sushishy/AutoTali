@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Edit3, FileText, ChevronDown, Smartphone, Check, Copy, Moon, Sun } from 'lucide-react';
+import { Camera, Edit3, FileText, ChevronDown, Smartphone, Check, Copy, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
 
 const MODE_ITEMS = [
   { id: 'scanner', label: 'Scanner', icon: Camera },
@@ -16,6 +16,8 @@ export default function ModeDropdown({
   phoneUrl,
   theme,
   onToggleTheme,
+  isMuted,
+  onToggleMute,
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -86,8 +88,11 @@ export default function ModeDropdown({
               position: 'fixed',
               inset: 0,
               zIndex: 190,
-              background: 'transparent',
+              background: 'rgba(0, 0, 0, 0.45)',
+              backdropFilter: 'blur(5px)',
+              WebkitBackdropFilter: 'blur(5px)',
               cursor: 'default',
+              animation: 'fadeIn 0.2s ease-out forwards',
             }}
           />
 
@@ -100,7 +105,7 @@ export default function ModeDropdown({
               background: 'var(--bg-elevated)',
               border: '1px solid var(--border-primary)',
               borderRadius: 'var(--radius-sm)',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+              boxShadow: '0 16px 40px rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.2)',
               display: 'flex',
               flexDirection: 'column',
               zIndex: 200,
@@ -208,6 +213,50 @@ export default function ModeDropdown({
               }}
             >
               {theme}
+            </span>
+          </button>
+
+          {/* Sound Mute/Unmute Toggle Button */}
+          <div style={{ height: 1, background: 'var(--border-primary)', margin: '4px 0' }} />
+          <button
+            onClick={onToggleMute}
+            title={isMuted ? 'Unmute all sounds' : 'Mute all sounds'}
+            style={{
+              padding: '7px 10px',
+              fontSize: '0.75rem',
+              background: 'transparent',
+              color: 'var(--text-primary)',
+              border: 'none',
+              borderRadius: 'var(--radius-xs)',
+              justifyContent: 'space-between',
+              width: '100%',
+              fontWeight: 500,
+              gap: 6,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {isMuted ? (
+                <VolumeX size={13} color="#ef4444" />
+              ) : (
+                <Volume2 size={13} color="var(--text-secondary)" />
+              )}
+              <span>Sound</span>
+            </div>
+            <span
+              style={{
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                padding: '2px 7px',
+                borderRadius: 'var(--radius-xs)',
+                background: 'var(--bg-subtle)',
+                border: '1px solid var(--border-primary)',
+                color: isMuted ? '#ef4444' : 'var(--text-primary)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                textTransform: 'capitalize',
+              }}
+            >
+              {isMuted ? 'Muted' : 'On'}
             </span>
           </button>
         </div>
