@@ -1,0 +1,210 @@
+/* ==========================================================================
+   STARRY QUESTIONNAIRE CHOICE BUTTON - SNAPPY MILLISECOND BURST
+   - Instant press trigger (0ms response)
+   - Disappears in milliseconds (crisp 350ms burst -> 200ms return)
+   - Zero layout lag: GPU-accelerated will-change and optimized drop-shadow
+   - Unified original burst physics across all steps (Part 1 to 7)
+   ========================================================================== */
+
+.starry-btn {
+  position: relative;
+  overflow: visible !important;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+  outline: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Likert scale boxes (1 to 5) - Steps 2 to 7 */
+.starry-btn.starry-likert {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border-primary);
+}
+
+/* Strand choices (Part 1 - STEM, TVL-ICT, Non-Aligned) */
+.starry-btn.starry-strand {
+  width: 100%;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-primary);
+  margin-bottom: 10px;
+}
+
+/* Detection Review mini boxes */
+.starry-btn.starry-review-mini {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-primary);
+}
+
+/* ==========================================================================
+   IDLE SELECTED STATE (Clean solid, NO stars, NO lag)
+   ========================================================================== */
+.starry-btn.is-selected {
+  background: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+  border-color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   CLICK / PRESS GLOW STATE (NO HOVER TO AVOID CONFLICTS)
+   ========================================================================== */
+.starry-btn:active,
+.starry-btn.starry-active-visual {
+  background: rgba(56, 189, 248, 0.08) !important;
+  color: #7dd3fc !important;
+  border: 1.5px solid #38bdf8 !important;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.55), inset 0 0 6px rgba(56, 189, 248, 0.12) !important;
+}
+
+.starry-btn .fil0 {
+  fill: #ffffff !important;
+}
+
+/* ==========================================================================
+   STAR BURST: RESTING STATE (Inside button, 0 opacity, fast 0.2s return)
+   ========================================================================== */
+.starry-btn .star-1,
+.starry-btn .star-2,
+.starry-btn .star-3,
+.starry-btn .star-4,
+.starry-btn .star-5,
+.starry-btn .star-6 {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  filter: drop-shadow(0 0 0 transparent);
+  z-index: 10;
+  will-change: top, left, opacity;
+  transition: all 0.2s ease-out; /* disappears rapidly in ~200ms when released */
+}
+
+.starry-btn .star-1 {
+  top: 20%;
+  left: 20%;
+  width: 25px;
+  height: auto;
+}
+
+.starry-btn .star-2 {
+  top: 45%;
+  left: 45%;
+  width: 15px;
+  height: auto;
+}
+
+.starry-btn .star-3 {
+  top: 40%;
+  left: 40%;
+  width: 5px;
+  height: auto;
+}
+
+.starry-btn .star-4 {
+  top: 20%;
+  left: 40%;
+  width: 8px;
+  height: auto;
+}
+
+.starry-btn .star-5 {
+  top: 25%;
+  left: 45%;
+  width: 15px;
+  height: auto;
+}
+
+.starry-btn .star-6 {
+  top: 5%;
+  left: 50%;
+  width: 5px;
+  height: auto;
+}
+
+/* ==========================================================================
+   STAR BURST: ACTIVE PRESS STATE (Cubic-bezier curves in snappy ~350ms)
+   ========================================================================== */
+.starry-btn:active .star-1,
+.starry-btn.starry-active-visual .star-1 {
+  top: -80%;
+  left: -30%;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px #38bdf8);
+  transition: all 0.35s cubic-bezier(0.05, 0.83, 0.43, 0.96);
+  z-index: 20;
+}
+
+.starry-btn:active .star-2,
+.starry-btn.starry-active-visual .star-2 {
+  top: -25%;
+  left: 10%;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px #38bdf8);
+  transition: all 0.35s cubic-bezier(0, 0.4, 0, 1.01);
+  z-index: 20;
+}
+
+.starry-btn:active .star-3,
+.starry-btn.starry-active-visual .star-3 {
+  top: 55%;
+  left: 25%;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px #38bdf8);
+  transition: all 0.32s cubic-bezier(0, 0.4, 0, 1.01);
+  z-index: 20;
+}
+
+.starry-btn:active .star-4,
+.starry-btn.starry-active-visual .star-4 {
+  top: 30%;
+  left: 80%;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px #38bdf8);
+  transition: all 0.30s cubic-bezier(0, 0.4, 0, 1.01);
+  z-index: 20;
+}
+
+.starry-btn:active .star-5,
+.starry-btn.starry-active-visual .star-5 {
+  top: 25%;
+  left: 115%;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px #38bdf8);
+  transition: all 0.28s cubic-bezier(0, 0.4, 0, 1.01);
+  z-index: 20;
+}
+
+.starry-btn:active .star-6,
+.starry-btn.starry-active-visual .star-6 {
+  top: 5%;
+  left: 60%;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px #38bdf8);
+  transition: all 0.30s ease;
+  z-index: 20;
+}

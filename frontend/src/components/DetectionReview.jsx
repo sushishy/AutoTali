@@ -1,43 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { RotateCcw, ArrowRight, Save, Check, ChevronLeft, ChevronDown, Dices } from 'lucide-react';
 import { generateRandomSectionAnswer } from '../utils/randomizer';
-
-function StarBurst() {
-  return (
-    <>
-      <div className="star-1" aria-hidden="true">
-        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
-          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
-        </svg>
-      </div>
-      <div className="star-2" aria-hidden="true">
-        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
-          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
-        </svg>
-      </div>
-      <div className="star-3" aria-hidden="true">
-        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
-          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
-        </svg>
-      </div>
-      <div className="star-4" aria-hidden="true">
-        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
-          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
-        </svg>
-      </div>
-      <div className="star-5" aria-hidden="true">
-        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
-          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
-        </svg>
-      </div>
-      <div className="star-6" aria-hidden="true">
-        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
-          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
-        </svg>
-      </div>
-    </>
-  );
-}
+import StarryChoiceButton from './common/StarryChoiceButton';
 
 export default function DetectionReview({
   section,
@@ -54,14 +18,6 @@ export default function DetectionReview({
   const isStrand = section.type === 'strand';
   const touchStartY = useRef(0);
   const [dragOffset, setDragOffset] = useState(0);
-  const [clickedChoice, setClickedChoice] = useState(null);
-
-  const triggerClickEffect = (id) => {
-    setClickedChoice(id);
-    setTimeout(() => {
-      setClickedChoice((prev) => (prev === id ? null : prev));
-    }, 450);
-  };
 
   const handleTouchStart = (e) => {
     touchStartY.current = e.touches[0].clientY;
@@ -170,35 +126,17 @@ export default function DetectionReview({
             ].map(({ val, label }) => {
               const active = detectedVal === val;
               return (
-                <button
+                <StarryChoiceButton
                   key={val}
-                  className={`starry-choice-btn ${clickedChoice === `strand-${val}` ? 'clicked' : ''}`}
-                  onClick={() => {
-                    triggerClickEffect(`strand-${val}`);
-                    onChange(val);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 'var(--radius-sm)',
-                    marginBottom: 6,
-                    textAlign: 'left',
-                    background: active ? 'var(--text-primary)' : 'var(--bg-elevated)',
-                    color: active ? 'var(--bg-primary)' : 'var(--text-primary)',
-                    border: active ? '1px solid var(--text-primary)' : '1px solid var(--border-primary)',
-                    fontWeight: active ? 700 : 500,
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
+                  variant="strand"
+                  isSelected={active}
+                  onClick={() => onChange(val)}
                 >
-                  <StarBurst />
-                  <span style={{ position: 'relative', zIndex: 1 }}>{label}</span>
-                  {active && <Check size={14} style={{ position: 'relative', zIndex: 1 }} />}
-                </button>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <span>{label}</span>
+                    {active && <Check size={14} />}
+                  </div>
+                </StarryChoiceButton>
               );
             })}
           </div>
@@ -212,46 +150,31 @@ export default function DetectionReview({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    padding: '6px 10px',
+                    padding: '8px 12px',
                     borderRadius: 'var(--radius-sm)',
                     background: 'var(--bg-elevated)',
                     border: '1px solid var(--border-primary)',
-                    marginBottom: 6,
+                    marginBottom: 8,
+                    overflow: 'visible',
                   }}
                 >
                   <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Q{qIdx + 1}</span>
-                  <div style={{ display: 'flex', gap: 4 }}>
+                  <div style={{ display: 'flex', gap: 6, overflow: 'visible' }}>
                     {[5, 4, 3, 2, 1].map((scaleVal) => {
                       const sel = v === scaleVal;
                       return (
-                        <button
+                        <StarryChoiceButton
                           key={scaleVal}
-                          className={`starry-choice-btn mini ${clickedChoice === `q${qIdx}-${scaleVal}` ? 'clicked' : ''}`}
+                          variant="review-mini"
+                          isSelected={sel}
                           onClick={() => {
-                            triggerClickEffect(`q${qIdx}-${scaleVal}`);
                             const updated = [...detectedVal];
                             updated[qIdx] = scaleVal;
                             onChange(updated);
                           }}
-                          style={{
-                            width: 30,
-                            height: 30,
-                            borderRadius: 'var(--radius-xs)',
-                            background: sel ? 'var(--text-primary)' : 'transparent',
-                            color: sel ? 'var(--bg-primary)' : 'var(--text-primary)',
-                            border: sel ? '1px solid var(--text-primary)' : '1px solid var(--border-primary)',
-                            fontWeight: 700,
-                            fontSize: '0.8rem',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
                         >
-                          <StarBurst />
-                          <span style={{ position: 'relative', zIndex: 1 }}>{scaleVal}</span>
-                        </button>
+                          {scaleVal}
+                        </StarryChoiceButton>
                       );
                     })}
                   </div>

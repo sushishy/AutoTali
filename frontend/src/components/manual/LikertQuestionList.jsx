@@ -1,10 +1,11 @@
 import React from 'react';
+import StarryChoiceButton from '../common/StarryChoiceButton';
 
 const SCALE_VALUES = [5, 4, 3, 2, 1];
 
 export default function LikertQuestionList({ values = [], onSelectLikert }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflow: 'visible' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
           Likert Scale: 5 (Strongly Agree) &rarr; 1 (Strongly Disagree)
@@ -22,6 +23,7 @@ export default function LikertQuestionList({ values = [], onSelectLikert }) {
             borderRadius: 'var(--radius-sm)',
             background: 'var(--bg-elevated)',
             border: '1px solid var(--border-primary)',
+            overflow: 'visible',
           }}
         >
           <div>
@@ -30,33 +32,18 @@ export default function LikertQuestionList({ values = [], onSelectLikert }) {
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6, overflow: 'visible' }}>
             {SCALE_VALUES.map((scaleVal) => {
               const sel = v === scaleVal;
               return (
-                <button
+                <StarryChoiceButton
                   key={scaleVal}
-                  type="button"
-                  className="likert-scale-btn"
+                  variant="likert"
+                  isSelected={sel}
                   onClick={() => onSelectLikert(qIdx, scaleVal)}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 'var(--radius-xs)',
-                    background: sel ? 'var(--text-primary)' : 'transparent',
-                    color: sel ? 'var(--bg-primary)' : 'var(--text-secondary)',
-                    border: `1px solid ${sel ? 'var(--text-primary)' : 'var(--border-primary)'}`,
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.15s ease',
-                  }}
                 >
                   {scaleVal}
-                </button>
+                </StarryChoiceButton>
               );
             })}
           </div>
