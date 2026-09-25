@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { RotateCcw, ArrowRight, Save, Check, ChevronLeft, ChevronDown, X, Dices } from 'lucide-react';
+import { RotateCcw, ArrowRight, Save, Check, ChevronLeft, ChevronDown, Dices } from 'lucide-react';
 import { generateRandomSectionAnswer } from '../utils/randomizer';
 
 export default function DetectionReview({
@@ -32,7 +32,6 @@ export default function DetectionReview({
 
   const handleTouchEnd = () => {
     if (dragOffset > 75) {
-      // Swiped down significantly, trigger dismiss
       if (onDismiss) onDismiss();
     }
     setDragOffset(0);
@@ -69,8 +68,8 @@ export default function DetectionReview({
         }}
         title="Swipe down or tap to close card"
       >
-        <div style={{ width: 42, height: 5, background: '#525252', borderRadius: 3 }} />
-        <span style={{ fontSize: '0.65rem', color: '#737373', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+        <div style={{ width: 42, height: 5, background: 'var(--border-primary)', borderRadius: 3 }} />
+        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
           Swipe down to view camera
         </span>
       </div>
@@ -85,7 +84,15 @@ export default function DetectionReview({
         <div style={{ display: 'flex', gap: 6 }}>
           <button
             onClick={onRetake}
-            style={{ padding: '4px 8px', fontSize: '0.72rem', background: 'transparent', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
+            style={{
+              padding: '4px 8px',
+              fontSize: '0.72rem',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-primary)',
+              color: 'var(--text-primary)',
+              borderRadius: 'var(--radius-xs)',
+              cursor: 'pointer',
+            }}
           >
             Retake
           </button>
@@ -93,7 +100,14 @@ export default function DetectionReview({
             <button
               onClick={onDismiss}
               title="Close card"
-              style={{ padding: '4px 6px', background: 'transparent', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
+              style={{
+                padding: '4px 6px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-primary)',
+                color: 'var(--text-primary)',
+                borderRadius: 'var(--radius-xs)',
+                cursor: 'pointer',
+              }}
             >
               <ChevronDown size={14} />
             </button>
@@ -120,13 +134,16 @@ export default function DetectionReview({
                     borderRadius: 'var(--radius-sm)',
                     marginBottom: 6,
                     textAlign: 'left',
-                    background: active ? '#ffffff' : 'transparent',
-                    color: active ? '#000000' : 'var(--text-secondary)',
-                    borderColor: active ? '#ffffff' : 'var(--border-primary)',
+                    background: active ? 'var(--text-primary)' : 'var(--bg-elevated)',
+                    color: active ? 'var(--bg-primary)' : 'var(--text-primary)',
+                    border: active ? '1px solid var(--text-primary)' : '1px solid var(--border-primary)',
                     fontWeight: active ? 700 : 500,
                     fontSize: '0.85rem',
                     display: 'flex',
                     justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <span>{label}</span>
@@ -168,11 +185,13 @@ export default function DetectionReview({
                             width: 30,
                             height: 30,
                             borderRadius: 'var(--radius-xs)',
-                            background: sel ? '#ffffff' : 'transparent',
-                            color: sel ? '#000000' : 'var(--text-secondary)',
-                            borderColor: sel ? '#ffffff' : 'var(--border-primary)',
+                            background: sel ? 'var(--text-primary)' : 'transparent',
+                            color: sel ? 'var(--bg-primary)' : 'var(--text-primary)',
+                            border: sel ? '1px solid var(--text-primary)' : '1px solid var(--border-primary)',
                             fontWeight: 700,
                             fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
                           }}
                         >
                           {scaleVal}
@@ -196,12 +215,14 @@ export default function DetectionReview({
             style={{
               padding: '10px 12px',
               fontSize: '0.85rem',
-              background: 'transparent',
-              color: '#ffffff',
-              borderColor: 'var(--border-primary)',
+              background: 'var(--bg-elevated)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: 'var(--radius-sm)',
               display: 'flex',
               alignItems: 'center',
               gap: 4,
+              cursor: isProcessing ? 'not-allowed' : 'pointer',
             }}
           >
             <ChevronLeft size={15} /> Back
@@ -211,7 +232,20 @@ export default function DetectionReview({
         <button
           onClick={onRetake}
           disabled={isProcessing}
-          style={{ flex: 1, padding: 10, fontSize: '0.85rem', background: 'transparent', color: '#ffffff' }}
+          style={{
+            flex: 1,
+            padding: 10,
+            fontSize: '0.85rem',
+            background: 'var(--bg-elevated)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-sm)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            cursor: isProcessing ? 'not-allowed' : 'pointer',
+          }}
         >
           <RotateCcw size={14} /> Retake
         </button>
@@ -224,11 +258,11 @@ export default function DetectionReview({
             padding: '10px 14px',
             background: 'var(--bg-elevated)',
             color: 'var(--text-primary)',
-            borderColor: 'var(--border-primary)',
+            border: '1px solid var(--border-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'pointer',
+            cursor: isProcessing ? 'not-allowed' : 'pointer',
             borderRadius: 'var(--radius-sm)',
           }}
         >
@@ -248,11 +282,17 @@ export default function DetectionReview({
                 flex: 2,
                 padding: 10,
                 fontSize: '0.85rem',
-                background: isComplete ? '#ffffff' : '#262626',
-                color: isComplete ? '#000000' : '#737373',
-                borderColor: isComplete ? '#ffffff' : '#262626',
+                background: isComplete ? 'var(--text-primary)' : 'var(--bg-subtle)',
+                color: isComplete ? 'var(--bg-primary)' : 'var(--text-muted)',
+                border: isComplete ? '1px solid var(--text-primary)' : '1px solid var(--border-primary)',
+                borderRadius: 'var(--radius-sm)',
                 fontWeight: 700,
-                cursor: isComplete ? 'pointer' : 'not-allowed',
+                cursor: isComplete && !isProcessing ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                transition: 'all 0.15s ease',
               }}
               title={!isComplete ? 'Please complete this section before proceeding' : ''}
             >

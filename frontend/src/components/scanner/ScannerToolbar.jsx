@@ -24,12 +24,14 @@ export default function ScannerToolbar({
         right: 12,
         display: 'flex',
         gap: 4,
-        background: 'rgba(0, 0, 0, 0.85)',
+        background: 'var(--bg-elevated)',
+        color: 'var(--text-primary)',
         padding: 4,
         borderRadius: 'var(--radius-sm)',
         border: '1px solid var(--border-primary)',
         alignItems: 'center',
         zIndex: 30,
+        boxShadow: '0 4px 14px rgba(0, 0, 0, 0.35)',
       }}
     >
       {/* Auto / Manual Mode Toggle Button */}
@@ -39,9 +41,9 @@ export default function ScannerToolbar({
         title={autoScanEnabled ? 'Auto Mode: ON (Scanning automatically)' : 'Manual Mode: ON (Tap shutter button to capture)'}
         style={{
           padding: '5px 9px',
-          background: autoScanEnabled ? 'rgba(59, 130, 246, 0.22)' : 'rgba(255, 255, 255, 0.08)',
-          color: autoScanEnabled ? '#3b82f6' : '#a3a3a3',
-          border: autoScanEnabled ? '1px solid #3b82f6' : '1px solid rgba(255, 255, 255, 0.2)',
+          background: autoScanEnabled ? 'rgba(59, 130, 246, 0.22)' : 'var(--bg-subtle)',
+          color: autoScanEnabled ? '#3b82f6' : 'var(--text-secondary)',
+          border: autoScanEnabled ? '1px solid #3b82f6' : '1px solid var(--border-primary)',
           borderRadius: 'var(--radius-xs)',
           fontSize: '0.72rem',
           fontWeight: 700,
@@ -66,7 +68,7 @@ export default function ScannerToolbar({
         style={{
           padding: '4px 6px',
           background: rotation !== 0 ? 'rgba(59, 130, 246, 0.22)' : 'transparent',
-          color: rotation !== 0 ? '#3b82f6' : '#ffffff',
+          color: rotation !== 0 ? '#3b82f6' : 'var(--text-primary)',
           border: 'none',
           borderRadius: 'var(--radius-xs)',
           display: 'flex',
@@ -89,8 +91,8 @@ export default function ScannerToolbar({
             title={torchOn ? 'Turn off flash' : 'Turn on flash'}
             style={{
               padding: '4px 6px',
-              background: torchOn ? '#ffffff' : 'transparent',
-              color: torchOn ? '#000000' : '#ffffff',
+              background: torchOn ? '#f59e0b' : 'transparent',
+              color: torchOn ? '#000000' : 'var(--text-primary)',
               border: 'none',
               borderRadius: 'var(--radius-xs)',
               display: 'flex',
@@ -98,7 +100,7 @@ export default function ScannerToolbar({
               cursor: 'pointer',
             }}
           >
-            {torchOn ? <Zap size={14} fill="#000000" /> : <ZapOff size={14} color="#a3a3a3" />}
+            {torchOn ? <Zap size={14} fill="#000000" /> : <ZapOff size={14} />}
           </button>
           <div style={{ width: 1, height: 16, background: 'var(--border-primary)', margin: '0 2px' }} />
         </>
@@ -107,24 +109,24 @@ export default function ScannerToolbar({
       {/* Zoom Controls */}
       <button
         onClick={onZoomOut}
-        style={{ padding: '4px 6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+        style={{ padding: '4px 6px', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}
         title="Zoom out"
       >
         <ZoomOut size={14} />
       </button>
-      <span style={{ fontSize: '0.75rem', fontWeight: 700, alignSelf: 'center', minWidth: 26, textAlign: 'center' }}>
+      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)', alignSelf: 'center', minWidth: 26, textAlign: 'center' }}>
         {zoomLevel}x
       </span>
       <button
         onClick={onZoomIn}
-        style={{ padding: '4px 6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+        style={{ padding: '4px 6px', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}
         title="Zoom in"
       >
         <ZoomIn size={14} />
       </button>
       <button
         onClick={onResetZoom}
-        style={{ padding: '4px 6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+        style={{ padding: '4px 6px', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}
         title="Reset Zoom"
       >
         <RotateCcw size={13} />
@@ -135,7 +137,7 @@ export default function ScannerToolbar({
       {/* Fullscreen Button */}
       <button
         onClick={onToggleFullscreen}
-        style={{ padding: '4px 6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+        style={{ padding: '4px 6px', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}
         title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Camera'}
       >
         {isFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}

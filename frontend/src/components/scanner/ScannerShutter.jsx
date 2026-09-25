@@ -30,12 +30,12 @@ export default function ScannerShutter({
             style={{
               padding: '7px 14px',
               fontSize: '0.75rem',
-              background: 'rgba(10, 10, 10, 0.85)',
+              background: 'var(--bg-elevated)',
               color: '#3b82f6',
               border: '1.5px solid #3b82f6',
               borderRadius: 20,
               fontWeight: 700,
-              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.6)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.35)',
               display: 'flex',
               alignItems: 'center',
               gap: 5,
@@ -50,24 +50,24 @@ export default function ScannerShutter({
           <button
             onClick={onViewAnswers}
             className="view-answers-pill"
-          style={{
-            padding: '8px 18px',
-            fontSize: '0.8rem',
-            background: '#ffffff',
-            color: '#000000',
-            border: '1px solid #ffffff',
-            borderRadius: 20,
-            fontWeight: 700,
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            cursor: 'pointer',
-          }}
-        >
-          <span>View Answers</span> &rarr;
-        </button>
-      )}
+            style={{
+              padding: '8px 18px',
+              fontSize: '0.8rem',
+              background: 'var(--text-primary)',
+              color: 'var(--bg-primary)',
+              border: '1px solid var(--text-primary)',
+              borderRadius: 20,
+              fontWeight: 700,
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              cursor: 'pointer',
+            }}
+          >
+            <span>View Answers</span> &rarr;
+          </button>
+        )}
       </div>
 
       {/* Direct Camera Shutter */}
@@ -84,8 +84,9 @@ export default function ScannerShutter({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          cursor: 'pointer',
+          cursor: isProcessing ? 'not-allowed' : 'pointer',
           boxShadow: '0 4px 14px rgba(0, 0, 0, 0.6)',
+          opacity: isProcessing ? 0.6 : 1,
         }}
       >
         <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#ffffff' }} />
@@ -98,12 +99,13 @@ export default function ScannerShutter({
           alignItems: 'center',
           gap: 5,
           padding: '4px 10px',
-          background: 'rgba(0, 0, 0, 0.8)',
+          background: 'var(--bg-elevated)',
           border: '1px solid var(--border-primary)',
           borderRadius: 'var(--radius-sm)',
-          color: '#a3a3a3',
+          color: 'var(--text-secondary)',
           fontSize: '0.7rem',
           cursor: 'pointer',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
         }}
       >
         <Camera size={12} /> Snap Photo (Phone Camera)

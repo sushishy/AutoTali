@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSurvey } from './hooks/useSurvey';
 import StepHeader from './components/StepHeader';
 import CameraScanner from './components/CameraScanner';
@@ -7,9 +7,13 @@ import ManualEntry from './components/ManualEntry';
 import SummaryView from './components/SummaryView';
 import PopupCard from './components/PopupCard';
 import TermsModal from './components/TermsModal';
-import { playSectionSuccess } from './utils/audio';
+import { playSectionSuccess, initGlobalButtonSounds } from './utils/audio';
 
 export default function App() {
+  useEffect(() => {
+    initGlobalButtonSounds();
+  }, []);
+
   const [popupCard, setPopupCard] = useState(null);
   const [showTermsModal, setShowTermsModal] = useState(() => {
     try {
@@ -124,7 +128,6 @@ export default function App() {
 
     const nextIdx = advanceStep();
     if (nextIdx !== -1) {
-      playSectionSuccess();
       const nextSec = sections[nextIdx];
       setDetectedVal(nextSec && updated[nextSec.id] !== undefined ? updated[nextSec.id] : null);
       setFrozenOverlay(null);

@@ -25,11 +25,14 @@ export default function RespondentModal({ isOpen, onClose, respondentNo, onConfi
         position: 'fixed',
         inset: 0,
         zIndex: 999,
-        background: 'rgba(0,0,0,0.75)',
+        background: 'rgba(0, 0, 0, 0.45)',
+        backdropFilter: 'blur(5px)',
+        WebkitBackdropFilter: 'blur(5px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 16,
+        animation: 'fadeIn 0.2s ease-out forwards',
       }}
     >
       <div
