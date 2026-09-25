@@ -80,17 +80,55 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCardOpen, setIsCardOpen] = useState(false);
 
+  // Automatically save any answer change immediately to collectedData & localStorage
+  const handleAnswerChange = (val) => {
+    setDetectedVal(val);
+    if (currentSection && currentSection.id) {
+      setCollectedData((prev) => {
+        const updated = { ...prev, [currentSection.id]: val };
+        try {
+          localStorage.setItem('autotali_data', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+    }
+  };
+
+  // Automatically sync detectedVal with saved progress whenever the step or section changes
+  useEffect(() => {
+    if (currentSection && currentSection.id) {
+      const existing = collectedData[currentSection.id];
+      if (existing !== undefined && existing !== null) {
+        setDetectedVal(existing);
+        setIsCardOpen(true);
+      } else {
+        setDetectedVal(null);
+        setIsCardOpen(false);
+      }
+      setFrozenOverlay(null);
+    }
+  }, [currentStepIdx, currentSection?.id]);
+
   const handleRetake = () => {
     setFrozenOverlay(null);
     setDetectedVal(null);
     setIsCardOpen(false);
+    if (currentSection && currentSection.id) {
+      setCollectedData((prev) => {
+        const updated = { ...prev };
+        delete updated[currentSection.id];
+        try {
+          localStorage.setItem('autotali_data', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+    }
   };
 
   const goToStep = (idx) => {
+    if (idx < 0 || (sections.length > 0 && idx >= sections.length)) return;
     setCurrentStepIdx(idx);
-    const targetSection = sections[idx];
-    setDetectedVal(targetSection && collectedData[targetSection.id] !== undefined ? collectedData[targetSection.id] : null);
-    handleRetake();
+    setFrozenOverlay(null);
   };
 
   const handleCapture = async (base64Image) => {
@@ -104,7 +142,7 @@ export default function App() {
       const data = await res.json();
       if (data.success) {
         setFrozenOverlay(data.overlay_base64);
-        setDetectedVal(data.detected_value);
+        handleAnswerChange(data.detected_value);
         setIsCardOpen(true);
       } else {
         showPopup('Detection Issue', 'Detection failed. Please check alignment and retry.', 'error');
@@ -118,7 +156,7 @@ export default function App() {
 
   const handleAutoLock = ({ overlayBase64, detectedValue }) => {
     setFrozenOverlay(overlayBase64);
-    setDetectedVal(detectedValue);
+    handleAnswerChange(detectedValue);
     setIsCardOpen(true);
   };
 
@@ -129,9 +167,10 @@ export default function App() {
     const nextIdx = advanceStep();
     if (nextIdx !== -1) {
       const nextSec = sections[nextIdx];
-      setDetectedVal(nextSec && updated[nextSec.id] !== undefined ? updated[nextSec.id] : null);
+      const nextVal = nextSec && updated[nextSec.id] !== undefined ? updated[nextSec.id] : null;
+      setDetectedVal(nextVal);
       setFrozenOverlay(null);
-      setIsCardOpen(false);
+      setIsCardOpen(nextVal !== null);
     } else {
       setIsProcessing(true);
       try {
@@ -143,7 +182,9 @@ export default function App() {
             'success'
           );
           resetSurvey(data.next_respondent_no);
-          handleRetake();
+          setFrozenOverlay(null);
+          setDetectedVal(null);
+          setIsCardOpen(false);
         } else {
           showPopup(
             'Save Failed',
@@ -195,7 +236,7 @@ export default function App() {
           <ManualEntry
             section={currentSection}
             currentVal={detectedVal}
-            onChange={setDetectedVal}
+            onChange={handleAnswerChange}
             onConfirm={handleConfirmNext}
             onPrevious={() => goToStep(currentStepIdx - 1)}
             canGoBack={currentStepIdx > 0}
@@ -225,7 +266,7 @@ export default function App() {
             <DetectionReview
               section={currentSection}
               detectedVal={detectedVal}
-              onChange={setDetectedVal}
+              onChange={handleAnswerChange}
               onRetake={handleRetake}
               onConfirm={handleConfirmNext}
               onPrevious={() => goToStep(currentStepIdx - 1)}

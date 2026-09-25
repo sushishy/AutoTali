@@ -154,3 +154,191 @@
     opacity: 1;
   }
 }
+
+/* ==========================================================================
+   QUESTIONNAIRE CHOICE BUTTON - STARRY HOVER & CLICK EFFECT
+   ========================================================================== */
+
+.starry-choice-btn {
+  position: relative;
+  overflow: visible !important;
+  transition: all 0.3s ease-in-out;
+}
+
+.starry-choice-btn:hover {
+  box-shadow: 0 0 15px #fec1958c;
+}
+
+.starry-choice-btn:active,
+.starry-choice-btn.clicked {
+  box-shadow: 0 0 25px #fec195c0;
+  transform: scale(0.96);
+}
+
+.starry-choice-btn .star-1,
+.starry-choice-btn .star-2,
+.starry-choice-btn .star-3,
+.starry-choice-btn .star-4,
+.starry-choice-btn .star-5,
+.starry-choice-btn .star-6 {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.starry-choice-btn .star-1 {
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  width: 22px;
+  height: auto;
+  filter: drop-shadow(0 0 0 #fffdef);
+  z-index: 10;
+  transition: all 0.9s cubic-bezier(0.05, 0.83, 0.43, 0.96);
+}
+
+.starry-choice-btn .star-2 {
+  position: absolute;
+  top: 45%;
+  left: 45%;
+  width: 14px;
+  height: auto;
+  filter: drop-shadow(0 0 0 #fffdef);
+  z-index: 10;
+  transition: all 0.9s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.starry-choice-btn .star-3 {
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  width: 5px;
+  height: auto;
+  filter: drop-shadow(0 0 0 #fffdef);
+  z-index: 10;
+  transition: all 0.9s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.starry-choice-btn .star-4 {
+  position: absolute;
+  top: 20%;
+  left: 40%;
+  width: 8px;
+  height: auto;
+  filter: drop-shadow(0 0 0 #fffdef);
+  z-index: 10;
+  transition: all 0.8s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.starry-choice-btn .star-5 {
+  position: absolute;
+  top: 25%;
+  left: 45%;
+  width: 14px;
+  height: auto;
+  filter: drop-shadow(0 0 0 #fffdef);
+  z-index: 10;
+  transition: all 0.6s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.starry-choice-btn .star-6 {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  width: 5px;
+  height: auto;
+  filter: drop-shadow(0 0 0 #fffdef);
+  z-index: 10;
+  transition: all 0.8s ease;
+}
+
+/* Hover & Active triggers */
+.starry-choice-btn:hover .star-1,
+.starry-choice-btn:active .star-1,
+.starry-choice-btn.clicked .star-1 {
+  opacity: 1;
+  top: -80%;
+  left: -20%;
+  filter: drop-shadow(0 0 8px #fec195) drop-shadow(0 0 12px #fffdef);
+}
+
+.starry-choice-btn:hover .star-2,
+.starry-choice-btn:active .star-2,
+.starry-choice-btn.clicked .star-2 {
+  opacity: 1;
+  top: -25%;
+  left: 10%;
+  filter: drop-shadow(0 0 8px #fec195) drop-shadow(0 0 12px #fffdef);
+}
+
+.starry-choice-btn:hover .star-3,
+.starry-choice-btn:active .star-3,
+.starry-choice-btn.clicked .star-3 {
+  opacity: 1;
+  top: 55%;
+  left: 25%;
+  filter: drop-shadow(0 0 8px #fec195) drop-shadow(0 0 12px #fffdef);
+}
+
+.starry-choice-btn:hover .star-4,
+.starry-choice-btn:active .star-4,
+.starry-choice-btn.clicked .star-4 {
+  opacity: 1;
+  top: 30%;
+  left: 80%;
+  filter: drop-shadow(0 0 8px #fec195) drop-shadow(0 0 12px #fffdef);
+}
+
+.starry-choice-btn:hover .star-5,
+.starry-choice-btn:active .star-5,
+.starry-choice-btn.clicked .star-5 {
+  opacity: 1;
+  top: 25%;
+  left: 105%;
+  filter: drop-shadow(0 0 8px #fec195) drop-shadow(0 0 12px #fffdef);
+}
+
+.starry-choice-btn:hover .star-6,
+.starry-choice-btn:active .star-6,
+.starry-choice-btn.clicked .star-6 {
+  opacity: 1;
+  top: -15%;
+  left: 60%;
+  filter: drop-shadow(0 0 8px #fec195) drop-shadow(0 0 12px #fffdef);
+}
+
+/* Scaled proportions for mini Likert 1-5 buttons */
+.starry-choice-btn.mini .star-1 { width: 14px; }
+.starry-choice-btn.mini .star-2 { width: 9px; }
+.starry-choice-btn.mini .star-3 { width: 4px; }
+.starry-choice-btn.mini .star-4 { width: 5px; }
+.starry-choice-btn.mini .star-5 { width: 9px; }
+.starry-choice-btn.mini .star-6 { width: 4px; }
+
+.starry-choice-btn.mini:hover .star-1,
+.starry-choice-btn.mini:active .star-1,
+.starry-choice-btn.mini.clicked .star-1 {
+  top: -65%;
+  left: -25%;
+}
+
+.starry-choice-btn.mini:hover .star-5,
+.starry-choice-btn.mini:active .star-5,
+.starry-choice-btn.mini.clicked .star-5 {
+  top: 20%;
+  left: 95%;
+}
+
+.starry-choice-btn .star-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.starry-choice-btn .fil0 {
+  fill: #fffdef;
+}
+
+[data-theme="light"] .starry-choice-btn .fil0 {
+  fill: #f59e0b;
+}
+

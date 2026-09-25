@@ -1,4 +1,5 @@
 import os
+import sys
 import base64
 import cv2
 import numpy as np
@@ -175,6 +176,14 @@ def save_survey(payload: SaveRequest):
         raise HTTPException(status_code=500, detail=message)
 
     _, next_resp_no = excel_writer.get_next_respondent_info()
+
+    # In-place terminal status update (increments on same line without spamming newlines)
+    try:
+        sys.stdout.write(f"\r  [Live Status] Respondent: {payload.respondent_no} saved (Next: #{next_resp_no})   ")
+        sys.stdout.flush()
+    except Exception:
+        pass
+
     return {
         "success": True,
         "message": message,

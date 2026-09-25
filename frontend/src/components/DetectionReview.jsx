@@ -2,6 +2,43 @@ import React, { useRef, useState } from 'react';
 import { RotateCcw, ArrowRight, Save, Check, ChevronLeft, ChevronDown, Dices } from 'lucide-react';
 import { generateRandomSectionAnswer } from '../utils/randomizer';
 
+function StarBurst() {
+  return (
+    <>
+      <div className="star-1" aria-hidden="true">
+        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
+          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
+        </svg>
+      </div>
+      <div className="star-2" aria-hidden="true">
+        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
+          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
+        </svg>
+      </div>
+      <div className="star-3" aria-hidden="true">
+        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
+          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
+        </svg>
+      </div>
+      <div className="star-4" aria-hidden="true">
+        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
+          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
+        </svg>
+      </div>
+      <div className="star-5" aria-hidden="true">
+        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
+          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
+        </svg>
+      </div>
+      <div className="star-6" aria-hidden="true">
+        <svg className="star-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53">
+          <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z" />
+        </svg>
+      </div>
+    </>
+  );
+}
+
 export default function DetectionReview({
   section,
   detectedVal,
@@ -17,6 +54,14 @@ export default function DetectionReview({
   const isStrand = section.type === 'strand';
   const touchStartY = useRef(0);
   const [dragOffset, setDragOffset] = useState(0);
+  const [clickedChoice, setClickedChoice] = useState(null);
+
+  const triggerClickEffect = (id) => {
+    setClickedChoice(id);
+    setTimeout(() => {
+      setClickedChoice((prev) => (prev === id ? null : prev));
+    }, 450);
+  };
 
   const handleTouchStart = (e) => {
     touchStartY.current = e.touches[0].clientY;
@@ -127,7 +172,11 @@ export default function DetectionReview({
               return (
                 <button
                   key={val}
-                  onClick={() => onChange(val)}
+                  className={`starry-choice-btn ${clickedChoice === `strand-${val}` ? 'clicked' : ''}`}
+                  onClick={() => {
+                    triggerClickEffect(`strand-${val}`);
+                    onChange(val);
+                  }}
                   style={{
                     width: '100%',
                     padding: '10px 14px',
@@ -146,8 +195,9 @@ export default function DetectionReview({
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  <span>{label}</span>
-                  {active && <Check size={14} />}
+                  <StarBurst />
+                  <span style={{ position: 'relative', zIndex: 1 }}>{label}</span>
+                  {active && <Check size={14} style={{ position: 'relative', zIndex: 1 }} />}
                 </button>
               );
             })}
@@ -176,7 +226,9 @@ export default function DetectionReview({
                       return (
                         <button
                           key={scaleVal}
+                          className={`starry-choice-btn mini ${clickedChoice === `q${qIdx}-${scaleVal}` ? 'clicked' : ''}`}
                           onClick={() => {
+                            triggerClickEffect(`q${qIdx}-${scaleVal}`);
                             const updated = [...detectedVal];
                             updated[qIdx] = scaleVal;
                             onChange(updated);
@@ -192,9 +244,13 @@ export default function DetectionReview({
                             fontSize: '0.8rem',
                             cursor: 'pointer',
                             transition: 'all 0.15s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                           }}
                         >
-                          {scaleVal}
+                          <StarBurst />
+                          <span style={{ position: 'relative', zIndex: 1 }}>{scaleVal}</span>
                         </button>
                       );
                     })}
