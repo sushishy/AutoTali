@@ -1,9 +1,9 @@
 /* ==========================================================================
-   STARRY QUESTIONNAIRE CHOICE BUTTON - SNAPPY MILLISECOND BURST
-   - Instant press trigger (0ms response)
-   - Disappears in milliseconds (crisp 350ms burst -> 200ms return)
-   - Zero layout lag: GPU-accelerated will-change and optimized drop-shadow
-   - Unified original burst physics across all steps (Part 1 to 7)
+   STARRY QUESTIONNAIRE CHOICE BUTTON - MOBILE ANDROID OPTIMIZED (60 FPS)
+   - touch-action: manipulation (eliminates 300ms mobile tap delay)
+   - transform: translateZ(0) hardware-accelerates stars on mobile GPU
+   - Only top, left, opacity transitioned (NO filter interpolation lag on mobile)
+   - Disappears crisply in milliseconds
    ========================================================================== */
 
 .starry-btn {
@@ -15,6 +15,7 @@
   outline: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 /* Likert scale boxes (1 to 5) - Steps 2 to 7 */
@@ -79,7 +80,7 @@
   background: rgba(56, 189, 248, 0.08) !important;
   color: #7dd3fc !important;
   border: 1.5px solid #38bdf8 !important;
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.55), inset 0 0 6px rgba(56, 189, 248, 0.12) !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.45) !important;
 }
 
 .starry-btn .fil0 {
@@ -98,10 +99,11 @@
   position: absolute;
   pointer-events: none;
   opacity: 0;
-  filter: drop-shadow(0 0 0 transparent);
   z-index: 10;
   will-change: top, left, opacity;
-  transition: all 0.2s ease-out; /* disappears rapidly in ~200ms when released */
+  transform: translateZ(0); /* Hardware accelerate on mobile GPU */
+  filter: drop-shadow(0 0 6px #38bdf8); /* Static filter - zero filter animation lag */
+  transition: top 0.2s ease-out, left 0.2s ease-out, opacity 0.2s ease-out;
 }
 
 .starry-btn .star-1 {
@@ -154,8 +156,7 @@
   top: -80%;
   left: -30%;
   opacity: 1;
-  filter: drop-shadow(0 0 8px #38bdf8);
-  transition: all 0.35s cubic-bezier(0.05, 0.83, 0.43, 0.96);
+  transition: top 0.35s cubic-bezier(0.05, 0.83, 0.43, 0.96), left 0.35s cubic-bezier(0.05, 0.83, 0.43, 0.96), opacity 0.35s cubic-bezier(0.05, 0.83, 0.43, 0.96);
   z-index: 20;
 }
 
@@ -164,8 +165,7 @@
   top: -25%;
   left: 10%;
   opacity: 1;
-  filter: drop-shadow(0 0 8px #38bdf8);
-  transition: all 0.35s cubic-bezier(0, 0.4, 0, 1.01);
+  transition: top 0.35s cubic-bezier(0, 0.4, 0, 1.01), left 0.35s cubic-bezier(0, 0.4, 0, 1.01), opacity 0.35s cubic-bezier(0, 0.4, 0, 1.01);
   z-index: 20;
 }
 
@@ -174,8 +174,7 @@
   top: 55%;
   left: 25%;
   opacity: 1;
-  filter: drop-shadow(0 0 8px #38bdf8);
-  transition: all 0.32s cubic-bezier(0, 0.4, 0, 1.01);
+  transition: top 0.32s cubic-bezier(0, 0.4, 0, 1.01), left 0.32s cubic-bezier(0, 0.4, 0, 1.01), opacity 0.32s cubic-bezier(0, 0.4, 0, 1.01);
   z-index: 20;
 }
 
@@ -184,8 +183,7 @@
   top: 30%;
   left: 80%;
   opacity: 1;
-  filter: drop-shadow(0 0 8px #38bdf8);
-  transition: all 0.30s cubic-bezier(0, 0.4, 0, 1.01);
+  transition: top 0.30s cubic-bezier(0, 0.4, 0, 1.01), left 0.30s cubic-bezier(0, 0.4, 0, 1.01), opacity 0.30s cubic-bezier(0, 0.4, 0, 1.01);
   z-index: 20;
 }
 
@@ -194,8 +192,7 @@
   top: 25%;
   left: 115%;
   opacity: 1;
-  filter: drop-shadow(0 0 8px #38bdf8);
-  transition: all 0.28s cubic-bezier(0, 0.4, 0, 1.01);
+  transition: top 0.28s cubic-bezier(0, 0.4, 0, 1.01), left 0.28s cubic-bezier(0, 0.4, 0, 1.01), opacity 0.28s cubic-bezier(0, 0.4, 0, 1.01);
   z-index: 20;
 }
 
@@ -204,7 +201,6 @@
   top: 5%;
   left: 60%;
   opacity: 1;
-  filter: drop-shadow(0 0 8px #38bdf8);
-  transition: all 0.30s ease;
+  transition: top 0.30s ease, left 0.30s ease, opacity 0.30s ease;
   z-index: 20;
 }

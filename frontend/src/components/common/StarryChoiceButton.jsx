@@ -39,20 +39,36 @@ function StarryChoiceButton({
 }) {
   const [isClicked, setIsClicked] = useState(false);
   const clickTimeoutRef = useRef(null);
+  const pointerHandledRef = useRef(false);
 
   const triggerBurst = () => {
     setIsClicked(true);
     if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
     clickTimeoutRef.current = setTimeout(() => {
       setIsClicked(false);
-    }, 360);
+    }, 350);
+  };
+
+  const handlePointerDown = (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    pointerHandledRef.current = true;
+    triggerBurst();
   };
 
   const handleClick = (e) => {
-    triggerBurst();
+    // If not already triggered by pointerdown, trigger now
+    if (!pointerHandledRef.current) {
+      triggerBurst();
+    }
+    setTimeout(() => {
+      pointerHandledRef.current = false;
+    }, 150);
+
     if (onClick) {
-      // Execute parent state update on next tick so button visual burst paints on frame 1 without delay
-      setTimeout(() => onClick(e), 0);
+      // Paint visual burst on frame 1 without blocking mobile main thread
+      requestAnimationFrame(() => {
+        onClick(e);
+      });
     }
   };
 
@@ -66,7 +82,7 @@ function StarryChoiceButton({
   return (
     <button
       type="button"
-      onPointerDown={triggerBurst}
+      onPointerDown={handlePointerDown}
       onClick={handleClick}
       className={`starry-btn ${variantClass} ${isSelected && !isClicked ? 'is-selected' : ''} ${isClicked ? 'starry-active-visual' : ''} ${className}`}
       style={style}
@@ -91,4 +107,15 @@ function StarryChoiceButton({
   );
 }
 
-export default memo(StarryChoiceButton);
+// Custom memo comparator: only re-render if selection state or visual content changes!
+// This stops all other 24 buttons from re-rendering when one button is clicked on Android.
+function arePropsEqual(prev, next) {
+  return (
+    prev.isSelected === next.isSelected &&
+    prev.children === next.children &&
+    prev.variant === next.variant &&
+    prev.className === next.className
+  );
+}
+
+export default memo(StarryChoiceButton, arePropsEqual);
